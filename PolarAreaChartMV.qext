@@ -1,0 +1,11 @@
+{
+    "name" : "Multi Variable Polar Area Chart",
+    "description" : "Multi Variable Polar Area Chart based On Chart.js  Library",
+    "icon" : "pie-chart",
+    "type" : "visualization",
+    "version": "1.0.0",
+    "preview" : "pie-chart",
+    "author": "Ruben Albuquerque"
+}
+
+
