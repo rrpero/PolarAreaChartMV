@@ -1,4 +1,4 @@
-# Multi Variable Polar Area Chart based On Chart.js  Library
+# Multi Measure Polar Area Chart based On Chart.js  Library
 
 
 1. Opções
