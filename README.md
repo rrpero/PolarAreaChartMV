@@ -1,16 +1,12 @@
-# Word CLoud Chart With Options to customize
+# Multi Variable Polar Area Chart based On Chart.js  Library
 
 
 1. Opções
 
 	- Opções
 
-		- Tipo de Rotação
-		- Tamanho Mínimo Texto
-		- Tamanho Máximo Texto
-		- Negrito
-		- Capitalizar
+		- Tamanho Raio
 		- Cores
-		- Borda
+		- Grid
 		- Cor de Fundo
 
