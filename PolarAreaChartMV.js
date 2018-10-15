@@ -148,17 +148,24 @@ define( [
 				if(typeof(layout.bold) == "undefined")
 					layout.bold="bold";				
 				if(typeof(layout.capitalize) == "undefined")
-					layout.capitalize="upper";					
-
-
-
-			 
-						
+					layout.capitalize="upper";	
+					
+				if(typeof(layout.keyPositionX) == "undefined")
+					layout.keyPositionX=0;	
+				if(typeof(layout.keyPositionY) == "undefined")
+					layout.keyPositionY=0;	
+				if(typeof(layout.graphGutter) == "undefined")
+					layout.graphGutter="graph";		
 				if(typeof(layout.labelTextSize) == "undefined")
-					layout.labelTextSize=100;	
+					layout.labelTextSize=100;					
 	
 				if(typeof(layout.labelDistance) == "undefined")
 					layout.labelDistance=10;
+				
+				if(typeof(layout.gutterTop) == "undefined")
+					layout.gutterTop=30;			
+				if(typeof(layout.gutterLeft) == "undefined")
+					layout.gutterLeft=100;				
 
 				var app = qlik.currApp(this);
 				var html="";
@@ -208,7 +215,7 @@ define( [
 					newStructureDim2[qMatrix[i][0].qText]={};
 					//[qMatrix[i][1].qText]=qMatrix[i][2].qNum;
 				}
-				console.log(layout.qHyperCube.qMeasureInfo);
+				//console.log(layout.qHyperCube.qMeasureInfo);
 				var newStructure ={};
 				for (var i=0; i<numberOfMeasures;i++){
 					//newStructure[layout.qHyperCube.qMeasureInfo[i].qFallbackTitle]=qMatrix[0][i].qNum;
@@ -565,6 +572,14 @@ define( [
 					testRadius=height;
 				testRadius=testRadius*(layout.chartRadius/275);
 				
+				//console.log(parseInt(testRadius*0.04));
+				//console.log((layout.labelTextSize/100));
+				
+				var labelTextSize = parseInt(testRadius*0.06)*(layout.labelTextSize/50);
+				//console.log(labelTextSize);
+				if(labelTextSize< 7)
+					labelTextSize=7;				
+				
 				
 				//RGraph.Reset(document.getElementById(tmpCVSID));
 				var min = Math.min.apply(null, measArrayNum),
@@ -607,6 +622,30 @@ define( [
 				var font="QlikView Sans";
 				//console.log(measArrayNum2);
 				//console.log(Object.keys(newStructure));
+				
+				var keys = numberOfDimensions==2?Object.keys(newStructureDim2):Object.keys(newStructure);
+				if (layout.chartLabels) {
+					var labelsArray = Object.keys(newStructure);
+					//var labelDimMeasArray =dimArray;
+					
+					/*if(layout.showValues=="value"||layout.showValues=="percent"){
+						var labelsArray = Object.keys(newStructure);
+						if(layout.onlyValues)
+							labelsArray=measArrayText;		
+						if(layout.showValues=="percent"){
+							var labelsArray = dimMeasPercArray;
+							if(layout.onlyValues)
+								labelsArray=measArrayPerc;						
+							//var labelDimMeasArray = dimMeasPercTPArray;
+						}				
+						}*/	
+				
+
+				} else {
+					var labelsArray = null;
+					//var labelDimMeasArray =[];
+				}
+				
 				var rose = new RGraph.Rose({
 					//id: 'canvas-wrapper-'+tmpCVSID,
 					id: tmpCVSID,
@@ -622,6 +661,10 @@ define( [
 					]*/,
 					options: {
 						//variant: 'non-equi-angular',
+						gutterLeft: layout.showLegends ? layout.gutterLeft+190: layout.gutterLeft,
+						gutterRight: 100,
+						gutterTop: layout.gutterTop,
+						gutterBottom: 50,
 						backgroundGridRadials:null,
 						backgroundGridCount:layout.grid?5:0,
 						backgroundAxes:true,
@@ -630,7 +673,7 @@ define( [
 						//labelsPosition:'edge',
 						textFont:'QlikView Sans',
 						labelsBoxed:false,
-						textSize:10,
+						textSize: labelTextSize,
 						textSizeScale:7,
 						backgroundGridColor: '#989080',
 						//tooltips: toolTipsArray,
@@ -653,11 +696,18 @@ define( [
 						]*/,
 						colors: palette,
 						linewidth: 0,
-						labels: Object.keys(newStructure),
+						labels: labelsArray,
 						//exploded: 3,
 						//strokestyle:'rgba(0,0,0,0.8)',
 						backgroundGridLinewidth:1,
-						key:numberOfDimensions==2?Object.keys(newStructureDim2):Object.keys(newStructure),
+						key:layout.showLegends ? keys: null,
+						keyHalign:"right",
+						keyPositionX:layout.keyPositionX,
+						keyPositionY:layout.keyPositionY,
+						keyPositionGraphBoxed:false,
+						keyPosition:layout.graphGutter,
+						keyTextBold:true,
+						keyTextSize:labelTextSize-2,						
 						eventsClick: onClickDimension
 					}
 				}).draw()

@@ -275,6 +275,36 @@ define( [
 			defaultValue: false
 	};		*/
 	
+	messages[language].SHOW_LABELS="Show Labels";
+
+	var chartLabels = {
+			type: "boolean",
+			component: "switch",
+			label: messages[language].SHOW_LABELS,
+			ref: "chartLabels",
+			options: [{
+				value: true,
+				label: messages[language].ON
+			}, {
+				value: false,
+				label: messages[language].OFF
+			}],
+			defaultValue: true
+	};
+	
+	messages[language].LABEL_TEXT_SIZE="Label Text Size";
+
+	var labelTextSize = {
+		type: "integer",
+		label: messages[language].LABEL_TEXT_SIZE,
+		ref: "labelTextSize",
+		component: "slider",
+		min: 10,
+		max: 200,
+		step: 1,			
+		//expression: "always",
+		defaultValue: 100
+	};		
 	
 	
 	messages[language].ITEM_OPTIONS="Opções";
@@ -290,7 +320,10 @@ define( [
 			palette:palette,
 			//border:border,
 			grid:grid,
-			backgroundColor:backgroundColor
+			backgroundColor:backgroundColor,
+			chartLabels,
+			labelTextSize
+			
 			//,keepColors:keepColors
 
 			//,thousandSeparator:thousandSeparator
@@ -325,6 +358,129 @@ define( [
 	
 	};
 	
+	messages[language].LEGEND_POSITION_HORIZONTAL="Posição Horizontal";
+	var keyPositionX = {
+			type: "integer",
+			label: messages[language].LEGEND_POSITION_HORIZONTAL,
+			ref: "keyPositionX",
+			component: "slider",
+			min: -300,
+			max: 300,
+			step: 3,
+			//expression: "always",
+			defaultValue: 0
+	};	
+	
+	messages[language].LEGEND_POSITION_VERTICAL="Posição Vertical";
+	var keyPositionY = {
+			type: "integer",
+			label: messages[language].LEGEND_POSITION_VERTICAL,
+			ref: "keyPositionY",
+			component: "slider",
+			min: -300,
+			max: 300,
+			step: 1,
+			//expression: "always",
+			defaultValue: 3
+	};		
+
+
+	
+	messages[language].SHOW_LEGENDS="Mostrar Legenda";
+	messages[language].SHOW="Mostrar";
+	messages[language].DONT_SHOW="Não Mostrar";
+
+	var showLegends = {
+			type: "boolean",
+			component: "switch",
+			label: messages[language].SHOW_LEGENDS,
+			ref: "showLegends",
+			options: [{
+				value: true,
+				label: messages[language].SHOW
+			}, {
+				value: false,
+				label: messages[language].DONT_SHOW
+			}],
+			defaultValue: false
+	};
+
+	
+	messages[language].ORIENTATION="Orientação";
+	messages[language].VERTICAL="Vertical";
+	messages[language].HORIZONTAL="Horizontal";
+	var graphGutter = {
+			type: "string",
+			component: "switch",
+			label: messages[language].ORIENTATION,
+			ref: "graphGutter",
+			options: [{
+				value: "graph",
+				label: messages[language].VERTICAL
+			}, {
+				value: "gutter",
+				label: messages[language].HORIZONTAL
+			}],
+			defaultValue: "graph"
+	};	
+
+	messages[language].ITEM_LEGENDS="Legenda";
+	//messages[language].ITEM_LABELS="Labels";
+	var legends = {
+		type:"items",
+		//component: "accordion",
+		label:messages[language].ITEM_LEGENDS,
+		items: {			
+			showLegends:showLegends,
+			graphGutter:graphGutter,
+			keyPositionX:keyPositionX,
+			keyPositionY:keyPositionY
+			
+		}
+	
+	};
+	
+	messages[language].CHART_POSITION_VERTICAL="Vertical";
+	var gutterTop = {
+			type: "integer",
+			label: messages[language].CHART_POSITION_VERTICAL,
+			ref: "gutterTop",
+			component: "slider",
+			min: -20,
+			max: 100,
+			step: 1,
+			//expression: "always",
+			defaultValue: 30
+	};
+	
+	messages[language].CHART_POSITION_HORIZONTAL="Horizontal";
+	var gutterLeft = {
+			type: "integer",
+			label: messages[language].CHART_POSITION_HORIZONTAL,
+			ref: "gutterLeft",
+			component: "slider",
+			min: -20,
+			max: 200,
+			step: 1,
+			//expression: "always",
+			defaultValue: 90
+	};
+
+	messages[language].ITEM_POSITION="Posição";	
+	var Position = {
+		type:"items",
+		//component: "expandable-items",
+		label:messages[language].ITEM_POSITION,
+		items: {
+			gutterTop:gutterTop,
+			gutterLeft:gutterLeft
+			//,rotateUpFor:rotateUpFor
+		}
+	
+	};	
+
+
+	
 	messages[language].EXPANDABLE_ITEM_OPTIONS = "Opções";
 	var optionsSizeBorders = {
 		//type:"items",
@@ -332,7 +488,9 @@ define( [
 		label:messages[language].EXPANDABLE_ITEM_OPTIONS,
 		items: {			
 			Options:Options,
-			chartSize:chartSize
+			Position:Position,
+			chartSize:chartSize,
+			legends:legends
 			
 		}
 	
