@@ -165,7 +165,20 @@ define( [
 				if(typeof(layout.gutterTop) == "undefined")
 					layout.gutterTop=30;			
 				if(typeof(layout.gutterLeft) == "undefined")
-					layout.gutterLeft=100;				
+					layout.gutterLeft=100;	
+
+				if(typeof(layout.upScale) == "undefined")
+					layout.upScale="n";	
+				if(typeof(layout.downScale) == "undefined")
+					layout.downScale="s";	
+				if(typeof(layout.leftScale) == "undefined")
+					layout.leftScale="w";	
+				if(typeof(layout.rightScale) == "undefined")
+					layout.rightScale="e";	
+				if(typeof(layout.stepScale) == "undefined")
+					layout.stepScale=5;					
+
+			
 
 				var app = qlik.currApp(this);
 				var html="";
@@ -426,6 +439,7 @@ define( [
 				}
 				else
 				{
+					var maxValue=0;
 					/*
 					for(var  i  in newStructure){
 						newStructure[i]=0;
@@ -449,6 +463,8 @@ define( [
 						itpx++;
 						
 						measArrayNum2[ix]=arrayValuesDim2;
+						if(arrayValuesDim2>maxValue)
+							maxValue=arrayValuesDim2;
 						ix++;
 					}					
 					
@@ -646,6 +662,17 @@ define( [
 					//var labelDimMeasArray =[];
 				}
 				
+				var labelAxes=layout.upScale+layout.downScale+layout.leftScale+layout.rightScale;
+				if(labelAxes=="")
+					labelAxes="";
+				
+				
+				
+				if(typeof(layout.grid)=="boolean")
+					layout.grid=5;
+				if(layout.grid<0)
+					layout.grid=0;
+				console.log(layout.grid+0);
 				var rose = new RGraph.Rose({
 					//id: 'canvas-wrapper-'+tmpCVSID,
 					id: tmpCVSID,
@@ -666,10 +693,14 @@ define( [
 						gutterTop: layout.gutterTop,
 						gutterBottom: 50,
 						backgroundGridRadials:null,
-						backgroundGridCount:layout.grid?5:0,
-						backgroundAxes:true,
+						//backgroundGridCount:layout.grid?layout.grid:0,
+						backgroundGridCount:layout.grid,
+						
+						backgroundAxes:layout.axes,
 						radius:testRadius,
-						labelsAxes:'n',
+						labelsAxes:layout.upScale+layout.downScale+layout.leftScale+layout.rightScale,
+						labelsCount:layout.stepScale,
+						ymax:maxValue,
 						//labelsPosition:'edge',
 						textFont:'QlikView Sans',
 						labelsBoxed:false,

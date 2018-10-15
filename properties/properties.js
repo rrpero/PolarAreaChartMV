@@ -233,7 +233,7 @@ define( [
 		defaultValue: false
 	};	
 	messages[language].GRID = "Grid";
-	var grid = {
+/*	var grid = {
 		type: "boolean",
 		component: "switch",
 		label: messages[language].GRID,
@@ -246,8 +246,32 @@ define( [
 			label: messages[language].NO
 		}],
 		defaultValue: true
-	};		
+	};	*/	
+var grid = {
+		type: "integer",
+		//component: "switch",
+		label: messages[language].GRID,
+		ref: "grid",
+		defaultValue: 1,
+		min: 0,
+		max: 200
+	};	
 	
+	messages[language].AXES = "Eixos";
+	var axes = {
+		type: "boolean",
+		component: "switch",
+		label: messages[language].AXES,
+		ref: "axes",
+		options: [{
+			value: true,
+			label: messages[language].YES
+		}, {
+			value: false,
+			label: messages[language].NO
+		}],
+		defaultValue: false
+	};		
 	
 	messages[language].BACKGROUND_COLOR = "Cor de Fundo";
 	var backgroundColor = {
@@ -320,6 +344,7 @@ define( [
 			palette:palette,
 			//border:border,
 			grid:grid,
+			axes:axes,
 			backgroundColor:backgroundColor,
 			chartLabels,
 			labelTextSize
@@ -331,6 +356,97 @@ define( [
 		}
 	
 	};
+	
+	messages[language].STEP_SCALE = "Passos da Escala";
+	var stepScale = {
+		type: "integer",
+		//component: "switch",
+		label: messages[language].STEP_SCALE,
+		ref: "stepScale",
+		defaultValue: "5",
+		min: "0",
+		max: "200"
+	};
+
+	
+	messages[language].UP_AXE_ESCALE = "Escala Eixo Em Cima"
+	var upScale = {
+		type: "string",
+		component: "switch",
+		label: messages[language].UP_AXE_ESCALE,
+		ref: "upScale",
+		options: [{
+			value: "n",
+			label: messages[language].YES
+		}, {
+			value: "",
+			label: messages[language].NO
+		}],
+		defaultValue: "n"
+	};
+
+	messages[language].DOWN_AXE_ESCALE = "Escala Eixo Em Baixo"
+	var downScale = {
+		type: "string",
+		component: "switch",
+		label: messages[language].DOWN_AXE_ESCALE,
+		ref: "downScale",
+		options: [{
+			value: "s",
+			label: messages[language].YES
+		}, {
+			value: "",
+			label: messages[language].NO
+		}],
+		defaultValue: ""
+	};	
+
+	messages[language].LEFT_AXE_ESCALE = "Escala Eixo Esquerda"
+	var leftScale = {
+		type: "string",
+		component: "switch",
+		label: messages[language].LEFT_AXE_ESCALE,
+		ref: "leftScale",
+		options: [{
+			value: "w",
+			label: messages[language].YES
+		}, {
+			value: "",
+			label: messages[language].NO
+		}],
+		defaultValue: ""
+	};	
+
+	messages[language].RIGHT_AXE_ESCALE = "Escala Eixo Direita"
+	var rightScale = {
+		type: "string",
+		component: "switch",
+		label: messages[language].RIGHT_AXE_ESCALE,
+		ref: "rightScale",
+		options: [{
+			value: "e",
+			label: messages[language].YES
+		}, {
+			value: "",
+			label: messages[language].NO
+		}],
+		defaultValue: ""
+	};	
+	
+	messages[language].ITEM_SCALE="Escala";
+	var Scale = {
+		type:"items",
+		label:messages[language].ITEM_SCALE,
+		items: {
+			stepScale:stepScale,			
+			upScale:upScale,
+			downScale:downScale,
+			leftScale:leftScale,
+			rightScale:rightScale
+		}
+	
+	};	
+	
 	
 	messages[language].CHART_RADIUS_SIZE = "Raio";
 	var chartRadius = {
@@ -490,7 +606,8 @@ define( [
 			Options:Options,
 			Position:Position,
 			chartSize:chartSize,
-			legends:legends
+			legends:legends,
+			Scale:Scale
 			
 		}
 	
