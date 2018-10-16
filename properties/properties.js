@@ -247,15 +247,28 @@ define( [
 		}],
 		defaultValue: true
 	};	*/	
-var grid = {
-		type: "integer",
-		//component: "switch",
-		label: messages[language].GRID,
-		ref: "grid",
-		defaultValue: 1,
-		min: 0,
-		max: 200
-	};	
+	var grid = {
+			type: "integer",
+			//component: "switch",
+			label: messages[language].GRID,
+			ref: "grid",
+			defaultValue: 1,
+			min: 0,
+			max: 200
+		};	
+		
+	messages[language].GRID_RADIALS="Divisórias";
+	var gridRadials = {
+			type: "integer",
+			//component: "switch",
+			label: messages[language].GRID_RADIALS,
+			ref: "gridRadials",
+			defaultValue: null,
+			min: 0,
+			max: 200
+		};	
+	
+
 	
 	messages[language].AXES = "Eixos";
 	var axes = {
@@ -344,6 +357,7 @@ var grid = {
 			palette:palette,
 			//border:border,
 			grid:grid,
+			gridRadials:gridRadials,
 			axes:axes,
 			backgroundColor:backgroundColor,
 			chartLabels,

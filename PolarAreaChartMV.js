@@ -8,11 +8,11 @@ requirejs.config({
 //    context: requirejs.s.contexts.sense ? "sense" : null,
     paths: {
 
-        "RGraph": "../extensions/PolarAreaChart/libraries/RGraph.common.core",
-		"RGraph.common.dynamic": "../extensions/PolarAreaChart/libraries/RGraph.common.dynamic",
-		"RGraph.common.tooltips": "../extensions/PolarAreaChart/libraries/RGraph.common.tooltips",
-		"RGraph.rose": "../extensions/PolarAreaChart/libraries/RGraph.rose",
-		"RGraph.common.key": "../extensions/PolarAreaChart/libraries/RGraph.common.key"
+        "RGraph": "../extensions/PolarAreaChartMV/libraries/RGraph.common.core",
+		"RGraph.common.dynamic": "../extensions/PolarAreaChartMV/libraries/RGraph.common.dynamic",
+		"RGraph.common.tooltips": "../extensions/PolarAreaChartMV/libraries/RGraph.common.tooltips",
+		"RGraph.rosemv": "../extensions/PolarAreaChartMV/libraries/RGraph.rosemv",
+		"RGraph.common.key": "../extensions/PolarAreaChartMV/libraries/RGraph.common.key"
     },
  /*   shim: {
         "RGraph": {
@@ -47,7 +47,7 @@ define( [
         ,'./properties/properties'
 		,'./properties/initialProperties',
 		"RGraph",
-		"RGraph.rose",
+		"RGraph.rosemv",
 		"RGraph.common.dynamic",
 		"RGraph.common.tooltips",
 		"RGraph.common.key"
@@ -673,7 +673,7 @@ define( [
 				if(layout.grid<0)
 					layout.grid=0;
 				console.log(layout.grid+0);
-				var rose = new RGraph.Rose({
+				var rose = new RGraph.RoseMV({
 					//id: 'canvas-wrapper-'+tmpCVSID,
 					id: tmpCVSID,
 					data: measArrayNum2/*[
@@ -692,9 +692,10 @@ define( [
 						gutterRight: 100,
 						gutterTop: layout.gutterTop,
 						gutterBottom: 50,
-						backgroundGridRadials:null,
+						backgroundGridRadials:layout.gridRadials,
 						//backgroundGridCount:layout.grid?layout.grid:0,
 						backgroundGridCount:layout.grid,
+						backgroundGrid:true,
 						
 						backgroundAxes:layout.axes,
 						radius:testRadius,
@@ -705,8 +706,8 @@ define( [
 						textFont:'QlikView Sans',
 						labelsBoxed:false,
 						textSize: labelTextSize,
-						textSizeScale:7,
-						backgroundGridColor: '#989080',
+						textSizeScale:Math.floor(labelTextSize*0.7),
+						backgroundGridColor: 'rgba(155,155,155,1)',//'#989080',
 						//tooltips: toolTipsArray,
 						tooltips:function (idx)
 						{

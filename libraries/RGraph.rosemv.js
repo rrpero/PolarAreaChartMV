@@ -12,7 +12,7 @@
 
     RGraph              = window.RGraph || {isRGraph: true};
     RGraph.Effects      = RGraph.Effects || {};
-    RGraph.Effects.Rose = RGraph.Effects.Rose || {};
+    RGraph.Effects.RoseMV = RGraph.Effects.RoseMV || {};
 
     /**
     * The rose chart constuctor
@@ -20,7 +20,7 @@
     * @param object canvas
     * @param array data
     */
-    RGraph.Rose = function (conf)
+    RGraph.RoseMV = function (conf)
     {
         /**
         * Allow for object config style
@@ -843,6 +843,13 @@
                             var explodedX = exploded[0];
                             var explodedY = exploded[1];
     
+
+							//tentativa triangulo
+							/*
+							co.moveTo(this.centerx,this.centery);
+							co.lineTo(this.centerx+radius*Math.cos(startAngle),this.centery+radius*Math.sin(startAngle));
+							co.lineTo(this.centerx+radius*Math.cos(endAngle),this.centery+radius*Math.sin(endAngle));
+							*/
                             co.arc(
                                 this.centerx + explodedX,
                                 this.centery + explodedY,
@@ -1121,7 +1128,7 @@
                         'font':font,
                         'size':size,
 						'bold':true,
-                        'x':centerx - 10,
+                        'x':centerx + 0,
                         'y':centery - (radius * ((i+1) / prop['chart.labels.count'])),
                         'text':this.scale2.labels[i],
                         'valign':'center',
@@ -1141,7 +1148,7 @@
                         'font':font,
                         'size':size,
 						'bold':true,
-                        'x':centerx - 10,
+                        'x':centerx - 0,
                         'y':centery + (radius * ((i+1) / prop['chart.labels.count'])),
                         'text':this.scale2.labels[i],
                         'valign':'center',
@@ -1162,7 +1169,7 @@
                         'size':size,
 						'bold':true,
                         'x':centerx + (radius * ((i+1) / prop['chart.labels.count'])),
-                        'y':centery + 10,
+                        'y':centery + 0,
                         'text':this.scale2.labels[i],
                         'valign':'top',
                         'halign':'center',
@@ -1182,7 +1189,7 @@
                         'size':size,
 						'bold':true,
                         'x':centerx - (radius * ((i+1) / prop['chart.labels.count'])),
-                        'y':centery + 10,
+                        'y':centery + 0,
                         'text':this.scale2.labels[i],
                         'valign':'top',
                         'halign':'center',
