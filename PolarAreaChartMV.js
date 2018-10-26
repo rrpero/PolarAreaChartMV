@@ -13,6 +13,7 @@ requirejs.config({
 		"RGraph.common.tooltips": "../extensions/PolarAreaChartMV/libraries/RGraph.common.tooltips",
 		"RGraph.rosemv": "../extensions/PolarAreaChartMV/libraries/RGraph.rosemv",
 		"RGraph.radar": "../extensions/PolarAreaChartMV/libraries/RGraph.radar",
+		"RGraph.funnel": "../extensions/PolarAreaChartMV/libraries/RGraph.funnel",
 		"RGraph.common.key": "../extensions/PolarAreaChartMV/libraries/RGraph.common.key"
     },
  /*   shim: {
@@ -50,6 +51,7 @@ define( [
 		"RGraph",
 		"RGraph.rosemv",
 		"RGraph.radar",
+		"RGraph.funnel",
 		"RGraph.common.dynamic",
 		"RGraph.common.tooltips",
 		"RGraph.common.key"
@@ -142,6 +144,11 @@ define( [
 					layout.palette="analogue1";	
 				if(typeof(layout.border) == "undefined")
 					layout.border=false;
+				if(typeof(layout.polar) == "undefined")
+					layout.polar="polar";				
+				
+				
+				
 				if(typeof(layout.backgroundColor) == "undefined"){
 					layout.backgroundColor={};				
 					layout.backgroundColor['color']="white;"
@@ -676,87 +683,115 @@ define( [
 					layout.grid=0;
 				//console.log(layout.grid+0);
 				
-				/*
-				console.log(measArrayNum2);
-				console.log(labelsArray);
-				var radar =  new RGraph.Radar({
-					id: tmpCVSID,
-					data: measArrayNum2,
-					options: {
-						labels: labelsArray,
-						labelsBold:true,
-						textAccessible: true,
-						gutterLeft: layout.showLegends ? layout.gutterLeft+190: layout.gutterLeft,
-						gutterRight: 100,
-						gutterTop: layout.gutterTop,
-						gutterBottom: 50,
-						backgroundGridRadials:layout.gridRadials,
-						//backgroundGridCount:layout.grid?layout.grid:0,
-						backgroundGridCount:layout.grid,
-						backgroundGrid:true,
-						
-						backgroundAxes:layout.axes,
-						radius:testRadius,	
-						textFont:'QlikView Sans',
-						labelsBoxed:false,
-						textSize: labelTextSize						
-					}
-				}).draw();
-				*/
 				
-				var rose = new RGraph.RoseMV({
-					//id: 'canvas-wrapper-'+tmpCVSID,
-					id: tmpCVSID,
-					data: measArrayNum2,
-					options: {
-						//variant: 'non-equi-angular',
-						gutterLeft: layout.showLegends ? layout.gutterLeft+190: layout.gutterLeft,
-						gutterRight: 100,
-						gutterTop: layout.gutterTop,
-						gutterBottom: 50,
-						backgroundGridRadials:layout.gridRadials,
-						//backgroundGridCount:layout.grid?layout.grid:0,
-						backgroundGridCount:layout.grid,
-						backgroundGrid:true,
+				//console.log(measArrayNum2);
+				console.log(testRadius);
+				if(layout.polar=="funnel"){
+					
+					    // Create the Funnel chart. Note the the values start at the maximum and decrease to the minimum.
 						
-						backgroundAxes:layout.axes,
-						radius:testRadius,
-						labelsAxes:layout.upScale+layout.downScale+layout.leftScale+layout.rightScale,
-						labelsCount:layout.stepScale,
-						ymax:maxValue,
-						//labelsPosition:'edge',
-						textFont:'QlikView Sans',
-						labelsBoxed:false,
-						textSize: labelTextSize,
-						textSizeScale:Math.floor(labelTextSize*0.7),
-						backgroundGridColor: 'rgba(155,155,155,1)',//'#989080',
-						//tooltips: toolTipsArray,
-						tooltips:function (idx)
-						{
-							return '<div id="__tooltip_div__">'+toolTipsArray[idx]+'</div>';
-								   //'s stats<br/><canvas id="__tooltip_canvas__" width="400" height="150">='
-								   //'[No canvas support]</canvas>';
-							},
-						tooltipsEvent: 'onmousemove',
-						colorsSequential: numberOfDimensions==2?false:true,
-						colors: palette,
-						linewidth: 0,
-						labels: labelsArray,
-						//exploded: 3,
-						//strokestyle:'rgba(0,0,0,0.8)',
-						backgroundGridLinewidth:1,
-						key:layout.showLegends ? keys: null,
-						keyHalign:"right",
-						keyPositionX:layout.keyPositionX,
-						keyPositionY:layout.keyPositionY,
-						keyPositionGraphBoxed:false,
-						keyPosition:layout.graphGutter,
-						keyTextBold:true,
-						keyTextSize:labelTextSize-2,						
-						eventsClick: onClickDimension
-					}
-				}).draw()
-				.on('tooltip', function (obj)
+					var rose = new RGraph.Funnel({
+						id: tmpCVSID,
+						data: measArrayNum2,
+						options: {
+							textBoxed: false,
+							//title: 'Leads through to sales',
+							labels: labelsArray,
+							shadow: true,
+							labelsSticks:true,
+							width:(width/2)/testRadius,
+							textFont:'QlikView Sans',
+							labelsBoxed:false,
+							textSize: labelTextSize,
+							funnelHorizontal:layout.gutterLeft//,
+							//gutterLeft: layout.showLegends ? layout.gutterLeft+190: layout.gutterLeft
+						}
+					}).draw();
+				}
+				else if(layout.polar=="radar"){
+					
+					
+					var rose =  new RGraph.Radar({
+						id: tmpCVSID,
+						data: measArrayNum2,
+						options: {
+							labels: labelsArray,
+							labelsBold:true,
+							textAccessible: true,
+							gutterLeft: layout.showLegends ? layout.gutterLeft+190: layout.gutterLeft,
+							gutterRight: 100,
+							gutterTop: layout.gutterTop,
+							gutterBottom: 50,
+							backgroundGridRadials:layout.gridRadials,
+							//backgroundGridCount:layout.grid?layout.grid:0,
+							backgroundGridCount:layout.grid,
+							backgroundGrid:true,
+							
+							backgroundAxes:layout.axes,
+							radius:testRadius,	
+							textFont:'QlikView Sans',
+							labelsBoxed:false,
+							textSize: labelTextSize						
+						}
+					}).draw();
+				}
+				else
+				{
+				
+					var rose = new RGraph.RoseMV({
+						//id: 'canvas-wrapper-'+tmpCVSID,
+						id: tmpCVSID,
+						data: measArrayNum2,
+						options: {
+							//variant: 'non-equi-angular',
+							gutterLeft: layout.showLegends ? layout.gutterLeft+190: layout.gutterLeft,
+							gutterRight: 100,
+							gutterTop: layout.gutterTop,
+							gutterBottom: 50,
+							backgroundGridRadials:layout.gridRadials,
+							//backgroundGridCount:layout.grid?layout.grid:0,
+							backgroundGridCount:layout.grid,
+							backgroundGrid:true,
+							
+							backgroundAxes:layout.axes,
+							radius:testRadius,
+							labelsAxes:layout.upScale+layout.downScale+layout.leftScale+layout.rightScale,
+							labelsCount:layout.stepScale,
+							ymax:maxValue,
+							//labelsPosition:'edge',
+							textFont:'QlikView Sans',
+							labelsBoxed:false,
+							textSize: labelTextSize,
+							textSizeScale:Math.floor(labelTextSize*0.7),
+							backgroundGridColor: 'rgba(155,155,155,1)',//'#989080',
+							//tooltips: toolTipsArray,
+							tooltips:function (idx)
+							{
+								return '<div id="__tooltip_div__">'+toolTipsArray[idx]+'</div>';
+									   //'s stats<br/><canvas id="__tooltip_canvas__" width="400" height="150">='
+									   //'[No canvas support]</canvas>';
+								},
+							tooltipsEvent: 'onmousemove',
+							colorsSequential: numberOfDimensions==2?false:true,
+							colors: palette,
+							linewidth: 0,
+							labels: labelsArray,
+							//exploded: 3,
+							//strokestyle:'rgba(0,0,0,0.8)',
+							backgroundGridLinewidth:1,
+							key:layout.showLegends ? keys: null,
+							keyHalign:"right",
+							keyPositionX:layout.keyPositionX,
+							keyPositionY:layout.keyPositionY,
+							keyPositionGraphBoxed:false,
+							keyPosition:layout.graphGutter,
+							keyTextBold:true,
+							keyTextSize:labelTextSize-2,						
+							eventsClick: onClickDimension
+						}
+					}).draw();
+				}
+				rose.on('tooltip', function (obj)
 				{
 					//console.log(obj);
 					
