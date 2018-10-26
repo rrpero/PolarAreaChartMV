@@ -12,6 +12,7 @@ requirejs.config({
 		"RGraph.common.dynamic": "../extensions/PolarAreaChartMV/libraries/RGraph.common.dynamic",
 		"RGraph.common.tooltips": "../extensions/PolarAreaChartMV/libraries/RGraph.common.tooltips",
 		"RGraph.rosemv": "../extensions/PolarAreaChartMV/libraries/RGraph.rosemv",
+		"RGraph.radar": "../extensions/PolarAreaChartMV/libraries/RGraph.radar",
 		"RGraph.common.key": "../extensions/PolarAreaChartMV/libraries/RGraph.common.key"
     },
  /*   shim: {
@@ -48,6 +49,7 @@ define( [
 		,'./properties/initialProperties',
 		"RGraph",
 		"RGraph.rosemv",
+		"RGraph.radar",
 		"RGraph.common.dynamic",
 		"RGraph.common.tooltips",
 		"RGraph.common.key"
@@ -672,20 +674,40 @@ define( [
 					layout.grid=5;
 				if(layout.grid<0)
 					layout.grid=0;
-				console.log(layout.grid+0);
+				//console.log(layout.grid+0);
+				
+				/*
+				console.log(measArrayNum2);
+				console.log(labelsArray);
+				var radar =  new RGraph.Radar({
+					id: tmpCVSID,
+					data: measArrayNum2,
+					options: {
+						labels: labelsArray,
+						labelsBold:true,
+						textAccessible: true,
+						gutterLeft: layout.showLegends ? layout.gutterLeft+190: layout.gutterLeft,
+						gutterRight: 100,
+						gutterTop: layout.gutterTop,
+						gutterBottom: 50,
+						backgroundGridRadials:layout.gridRadials,
+						//backgroundGridCount:layout.grid?layout.grid:0,
+						backgroundGridCount:layout.grid,
+						backgroundGrid:true,
+						
+						backgroundAxes:layout.axes,
+						radius:testRadius,	
+						textFont:'QlikView Sans',
+						labelsBoxed:false,
+						textSize: labelTextSize						
+					}
+				}).draw();
+				*/
+				
 				var rose = new RGraph.RoseMV({
 					//id: 'canvas-wrapper-'+tmpCVSID,
 					id: tmpCVSID,
-					data: measArrayNum2/*[
-					
-						[4,8,6,5],
-						[4,5,1,2],
-						[2,5,9,1],
-						[6,5,8,8],
-						[1,3,5,9],
-						[4,6,8,5],
-						[4,5,6,3]
-					]*/,
+					data: measArrayNum2,
 					options: {
 						//variant: 'non-equi-angular',
 						gutterLeft: layout.showLegends ? layout.gutterLeft+190: layout.gutterLeft,
@@ -716,16 +738,7 @@ define( [
 								   //'[No canvas support]</canvas>';
 							},
 						tooltipsEvent: 'onmousemove',
-						colorsSequential: numberOfDimensions==2?false:true/*[
-						
-							'a','b','c','d',
-							'e','f','g','h',
-							'i','j','k','l',
-							'm','n','o','p',
-							'q','r','s','t',
-							'u','v','w','x',
-							'y','z','aa','bb'
-						]*/,
+						colorsSequential: numberOfDimensions==2?false:true,
 						colors: palette,
 						linewidth: 0,
 						labels: labelsArray,
