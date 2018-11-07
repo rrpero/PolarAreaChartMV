@@ -21,13 +21,18 @@ define( [
 	//var language="en_US";
 	var app = qlik.currApp();
 
+	var maxDimensions=2;
+	var maxMeasures = 20;
     // *****************************************************************************
     // Dimensions & Measures
     // *****************************************************************************
     var dimensions = {
         uses: "dimensions",
         min: 0,
-        max: 0
+        max: 2,
+		show:function(d){
+			console.log(d);
+		}
     };
 
     var measures = {
@@ -138,6 +143,7 @@ define( [
 	messages[language].POLAR = "Polar";
 	messages[language].RADAR = "Radar";
 	messages[language].FUNNEL = "Pirâmide";
+	messages[language].WATERFALL = "Waterfall";	
 	var polar = {
 		type: "string",
 		component: "dropdown",
@@ -146,14 +152,17 @@ define( [
 		options: [{
 			value: "polar",
 			label: messages[language].POLAR
-		}, {
+		}/*, {
 			value: "radar",
 			label: messages[language].RADAR
 		}, {
 			value: "funnel",
 			label: messages[language].FUNNEL
-		}],
-		defaultValue: true
+		}, {
+			value: "waterfall",
+			label: messages[language].WATERFALL
+		}*/],
+		defaultValue: "polar"
 	};	
 	
 	messages[language].ANALOGUE1 =  "Análogas 1";
@@ -194,6 +203,19 @@ define( [
 			
 			],
 			defaultValue: "analogue1"
+	};
+
+	messages[language].TRANSPARENT="Transparência";
+	var transparent = {
+		type: "float",
+		label: messages[language].TRANSPARENT,
+		ref: "transparent",
+		component: "slider",
+		min: 0.1,
+		max: 1,
+		step: 0.1,			
+		//expression: "always",
+		defaultValue: 1
 	};		
 
 	messages[language].BOLD = "Negrito";
@@ -269,6 +291,17 @@ define( [
 		}],
 		defaultValue: true
 	};	*/	
+	
+	
+	var showTo =  function (a,d){
+				if(a.indexOf(d.polar) >=0)
+					return true;
+				return false;
+	};
+	var show={};
+	show['options']={};
+	show['options']['grid']=["polar","radar"];
+	messages[language].GRID  = "Grid";
 	var grid = {
 			type: "integer",
 			//component: "switch",
@@ -276,9 +309,18 @@ define( [
 			ref: "grid",
 			defaultValue: 1,
 			min: 0,
-			max: 200
-		};	
+			max: 200,
+			show: function (d){
+				return showTo(show['options']['grid'],d);
+
+			}			
 		
+		};	
+	
+	
+
+
+	show['options']['gridRadials']=["polar"];
 	messages[language].GRID_RADIALS="Divisórias";
 	var gridRadials = {
 			type: "integer",
@@ -287,25 +329,32 @@ define( [
 			ref: "gridRadials",
 			defaultValue: null,
 			min: 0,
-			max: 200
+			max: 200,
+			show: function (d) {
+				return showTo(show['options']["gridRadials"],d);
+			}
 		};	
 	
 
 	
 	messages[language].AXES = "Eixos";
+	show['options']['axes']=["polar"];	
 	var axes = {
-		type: "boolean",
-		component: "switch",
-		label: messages[language].AXES,
-		ref: "axes",
-		options: [{
-			value: true,
-			label: messages[language].YES
-		}, {
-			value: false,
-			label: messages[language].NO
-		}],
-		defaultValue: false
+			type: "boolean",
+			component: "switch",
+			label: messages[language].AXES,
+			ref: "axes",
+			options: [{
+				value: true,
+				label: messages[language].YES
+			}, {
+				value: false,
+				label: messages[language].NO
+			}],
+			defaultValue: false,
+			show: function (d) {
+				return showTo(show['options']["axes"],d);
+			}	
 	};		
 	
 	messages[language].BACKGROUND_COLOR = "Cor de Fundo";
@@ -316,6 +365,7 @@ define( [
 			component:"color-picker",
 			//expression: "always",
 			defaultValue: "#ffffff"
+			
 	};	
 	
 	/*
@@ -335,7 +385,7 @@ define( [
 	};		*/
 	
 	messages[language].SHOW_LABELS="Show Labels";
-
+	show['options']['chartLabels']=["polar","radar","funnel"];
 	var chartLabels = {
 			type: "boolean",
 			component: "switch",
@@ -348,8 +398,28 @@ define( [
 				value: false,
 				label: messages[language].OFF
 			}],
-			defaultValue: true
+			defaultValue: true,
+			show: function (d) {
+				return showTo(show['options']["chartLabels"],d);
+			}	
 	};
+	
+	messages[language].APPROX="Aproximação Labels";
+	show['options']['labelsApprox']=["polar"];
+	var labelsApprox = {
+		type: "float",
+		label: messages[language].APPROX,
+		ref: "labelsApprox",
+		component: "slider",
+		min: 0.1,
+		max: 1,
+		step: 0.1,			
+		//expression: "always",
+		defaultValue: 1,
+		show: function (d) {
+			return showTo(show['options']["labelsApprox"],d);
+		}			
+	};	
 	
 	messages[language].LABEL_TEXT_SIZE="Label Text Size";
 
@@ -362,7 +432,8 @@ define( [
 		max: 200,
 		step: 1,			
 		//expression: "always",
-		defaultValue: 100
+		defaultValue: 100,
+		show:true
 	};		
 	
 	
@@ -378,23 +449,28 @@ define( [
 			//capitalize:capitalize,
 			polar:polar,
 			palette:palette,
+			transparent:transparent,
 			//border:border,
 			grid:grid,
 			gridRadials:gridRadials,
 			axes:axes,
 			backgroundColor:backgroundColor,
 			chartLabels,
-			labelTextSize
+			labelTextSize,
+			labelsApprox
 			
 			//,keepColors:keepColors
 
 			//,thousandSeparator:thousandSeparator
 			//,decimalSeparator:decimalSeparator
-		}
+		},
+		show: true
 	
 	};
 	
 	messages[language].STEP_SCALE = "Passos da Escala";
+	show['scale']={};
+	show['scale']['stepScale']=["polar"];		
 	var stepScale = {
 		type: "integer",
 		//component: "switch",
@@ -402,11 +478,15 @@ define( [
 		ref: "stepScale",
 		defaultValue: "5",
 		min: "0",
-		max: "200"
+		max: "200",
+		show: function (d) {
+			return showTo(show['scale']["stepScale"],d);
+		}			
 	};
 
 	
-	messages[language].UP_AXE_ESCALE = "Escala Eixo Em Cima"
+	messages[language].UP_AXE_ESCALE = "Escala Eixo Em Cima";
+	show['scale']['upScale']=["polar"];	
 	var upScale = {
 		type: "string",
 		component: "switch",
@@ -419,10 +499,14 @@ define( [
 			value: "",
 			label: messages[language].NO
 		}],
-		defaultValue: "n"
+		defaultValue: "n",
+		show: function (d) {
+			return showTo(show['scale']["upScale"],d);
+		}	
 	};
 
-	messages[language].DOWN_AXE_ESCALE = "Escala Eixo Em Baixo"
+	messages[language].DOWN_AXE_ESCALE = "Escala Eixo Em Baixo";
+	show['scale']['downScale']=["polar"];	
 	var downScale = {
 		type: "string",
 		component: "switch",
@@ -435,10 +519,14 @@ define( [
 			value: "",
 			label: messages[language].NO
 		}],
-		defaultValue: ""
+		defaultValue: "",
+		show: function (d) {
+			return showTo(show['scale']["downScale"],d);
+		}			
 	};	
 
 	messages[language].LEFT_AXE_ESCALE = "Escala Eixo Esquerda"
+	show['scale']['leftScale']=["polar"];	
 	var leftScale = {
 		type: "string",
 		component: "switch",
@@ -451,10 +539,14 @@ define( [
 			value: "",
 			label: messages[language].NO
 		}],
-		defaultValue: ""
+		defaultValue: "",
+		show: function (d) {
+			return showTo(show['scale']["leftScale"],d);
+		}			
 	};	
 
-	messages[language].RIGHT_AXE_ESCALE = "Escala Eixo Direita"
+	messages[language].RIGHT_AXE_ESCALE = "Escala Eixo Direita";
+	show['scale']['rightScale']=["polar"];
 	var rightScale = {
 		type: "string",
 		component: "switch",
@@ -467,10 +559,15 @@ define( [
 			value: "",
 			label: messages[language].NO
 		}],
-		defaultValue: ""
+		defaultValue: "",
+		show: function (d) {
+			return showTo(show['scale']["rightScale"],d);
+		}			
 	};	
 	
+
 	messages[language].ITEM_SCALE="Escala";
+	show['scale']['scale']=["polar"];	
 	var Scale = {
 		type:"items",
 		label:messages[language].ITEM_SCALE,
@@ -480,7 +577,10 @@ define( [
 			downScale:downScale,
 			leftScale:leftScale,
 			rightScale:rightScale
-		}
+		},
+		show: function (d) {
+			return showTo(show['scale']['scale'],d);
+		}			
 	
 	};	
 	
@@ -511,6 +611,7 @@ define( [
 	
 	};
 	
+	show['legends']={};
 	messages[language].LEGEND_POSITION_HORIZONTAL="Posição Horizontal";
 	var keyPositionX = {
 			type: "integer",
@@ -578,6 +679,7 @@ define( [
 	};	
 
 	messages[language].ITEM_LEGENDS="Legenda";
+	show['legends']['legends']=["polar"];
 	//messages[language].ITEM_LABELS="Labels";
 	var legends = {
 		type:"items",
@@ -589,11 +691,16 @@ define( [
 			keyPositionX:keyPositionX,
 			keyPositionY:keyPositionY
 			
-		}
+		},
+		show: function (d) {
+			return showTo(show['legends']['legends'],d);
+		}	
 	
 	};
 	
+	show['position']={};
 	messages[language].CHART_POSITION_VERTICAL="Vertical";
+	show['position']['gutterTop']=["polar","waterfall","radar"];
 	var gutterTop = {
 			type: "integer",
 			label: messages[language].CHART_POSITION_VERTICAL,
@@ -603,7 +710,10 @@ define( [
 			max: 100,
 			step: 1,
 			//expression: "always",
-			defaultValue: 30
+			defaultValue: 30,
+			show: function (d) {
+				return showTo(show['position']['gutterTop'],d);
+			}
 	};
 	
 	messages[language].CHART_POSITION_HORIZONTAL="Horizontal";

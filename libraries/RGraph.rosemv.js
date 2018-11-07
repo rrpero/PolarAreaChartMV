@@ -105,6 +105,7 @@
             'chart.labels.axes':            'nsew',
             'chart.labels.boxed':           false,
             'chart.labels.offset':          0,
+			'chart.labels.approx':			1,
             'chart.text.color':             'black',
             'chart.text.font':              'Arial, Verdana, sans-serif',
             'chart.text.size':              12,
@@ -1247,9 +1248,17 @@
                     var a = (RG.TWOPI / this.data.length) * (i + 1) - (RG.TWOPI / (this.data.length * 2));
                     var a = a - RG.HALFPI + (prop['chart.labels.position'] == 'edge' ? ((RG.TWOPI / this.data.length) / 2) : 0);
                 }
-    
-                var x = centerx + (ma.cos(a) * radius);
-                var y = centery + (ma.sin(a) * radius);
+				//tetativa
+				
+				var radiusT = radius;
+				if(prop['chart.labels.approx']<1){
+					radiusT = ((this.data[i] - prop['chart.ymin']) / (this.max - prop['chart.ymin'])) * (this.radius*1.1);
+					if(radiusT<(radius*prop['chart.labels.approx']))
+						radiusT=prop['chart.labels.approx']*radius;
+				}
+				
+                var x = centerx + (ma.cos(a) * radiusT);
+                var y = centery + (ma.sin(a) * radiusT);
     
                 // Horizontal alignment
                 if (x > centerx) {
