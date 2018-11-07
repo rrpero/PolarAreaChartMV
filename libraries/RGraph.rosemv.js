@@ -1252,7 +1252,16 @@
 				
 				var radiusT = radius;
 				if(prop['chart.labels.approx']<1){
-					radiusT = ((this.data[i] - prop['chart.ymin']) / (this.max - prop['chart.ymin'])) * (this.radius*1.1);
+					var dataI = 0;
+					if(this.data[i].constructor === Array)
+					{
+						for(j in this.data[i])
+							dataI = dataI+this.data[i][j];
+					}
+					else
+						dataI = this.data[i];
+						
+					radiusT = ((dataI - prop['chart.ymin']) / (this.max - prop['chart.ymin'])) * (this.radius*1.1);
 					if(radiusT<(radius*prop['chart.labels.approx']))
 						radiusT=prop['chart.labels.approx']*radius;
 				}
