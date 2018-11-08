@@ -583,6 +583,7 @@ define( [
 							textBoxed: false,
 							//title: 'Leads through to sales',
 							labels: labelsArray,
+							showvalues:layout.showvalues,
 							shadow: true,
 							labelsSticks:true,
 							width:(width/2)/testRadius,
@@ -684,6 +685,7 @@ define( [
 							colors: palette,
 							linewidth: 0,
 							labels: labelsArray,
+							showvalues:layout.showvalues,
 							labelsApprox:layout.labelsApprox,
 							//exploded: 3,
 							//strokestyle:'rgba(0,0,0,0.8)',
@@ -826,7 +828,8 @@ define( [
 			 
 			 
 			 function setUndefined(){
-				 
+				 if(typeof(layout.showvalues) == "undefined")
+					layout.showvalues=false;					 
 				 if(typeof(layout.transparent) == "undefined")
 					layout.transparent=1;					 
 				 if(typeof(layout.labelsApprox) == "undefined")

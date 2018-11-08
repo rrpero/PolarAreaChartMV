@@ -384,8 +384,8 @@ define( [
 			defaultValue: false
 	};		*/
 	
-	messages[language].SHOW_LABELS="Show Labels";
-	show['options']['chartLabels']=["polar","radar","funnel"];
+	messages[language].SHOW_LABELS="Mostrar Labels";
+	show['options']['chartLabels']=["polar","funnel"];
 	var chartLabels = {
 			type: "boolean",
 			component: "switch",
@@ -401,6 +401,26 @@ define( [
 			defaultValue: true,
 			show: function (d) {
 				return showTo(show['options']["chartLabels"],d);
+			}	
+	};
+
+	messages[language].SHOW_VALUES="Mostrar Valores";
+	show['options']['showvalues']=["polar","funnel"];
+	var showvalues = {
+			type: "boolean",
+			component: "switch",
+			label: messages[language].SHOW_VALUES,
+			ref: "showvalues",
+			options: [{
+				value: true,
+				label: messages[language].ON
+			}, {
+				value: false,
+				label: messages[language].OFF
+			}],
+			defaultValue: false,
+			show: function (d) {
+				return showTo(show['options']["showvalues"],d);
 			}	
 	};
 	
@@ -456,6 +476,7 @@ define( [
 			axes:axes,
 			backgroundColor:backgroundColor,
 			chartLabels,
+			showvalues,
 			labelTextSize,
 			labelsApprox
 			

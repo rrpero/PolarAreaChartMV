@@ -63,7 +63,8 @@
         
         this.properties =
         {
-            'chart.background.axes':        true,
+            'chart.showvalues':				false,
+			'chart.background.axes':        true,
             'chart.background.axes.color':  'black',
             'chart.background.grid':        true,
             'chart.background.grid.color':  '#ccc',
@@ -1251,15 +1252,15 @@
 				//tetativa
 				
 				var radiusT = radius;
+				var dataI = 0;
+				if(this.data[i].constructor === Array)
+				{
+					for(j in this.data[i])
+						dataI = dataI+this.data[i][j];
+				}
+				else
+					dataI = this.data[i];				
 				if(prop['chart.labels.approx']<1){
-					var dataI = 0;
-					if(this.data[i].constructor === Array)
-					{
-						for(j in this.data[i])
-							dataI = dataI+this.data[i][j];
-					}
-					else
-						dataI = this.data[i];
 						
 					radiusT = ((dataI - prop['chart.ymin']) / (this.max - prop['chart.ymin'])) * (this.radius*1.1);
 					if(radiusT<(radius*prop['chart.labels.approx']))
@@ -1268,15 +1269,28 @@
 				
                 var x = centerx + (ma.cos(a) * radiusT);
                 var y = centery + (ma.sin(a) * radiusT);
-    
+				
+
+				
                 // Horizontal alignment
                 if (x > centerx) {
-                    halign = 'left';
+                    halign = 'left';					
                 } else if (Math.round(x) == centerx) {
                     halign = 'center';
                 } else {
                     halign = 'right';
                 }
+				var labelPrint=labels[i];
+				if(prop['chart.showvalues']){
+					               
+					if (x > centerx) {
+						labelPrint=dataI +" - "	+labelPrint;				
+					} else if (Math.round(x) == centerx) {
+						labelPrint=dataI+" - "	+labelPrint;
+					} else {
+						labelPrint=labelPrint+" - "+dataI;
+					}
+				}
     
                 RG.text2(this, {
                     'color': labelsColor,
@@ -1285,7 +1299,7 @@
                     'size':size,
                     'x':x,
                     'y':y,
-                    'text':String(labels[i]),
+                    'text':String(labelPrint),
                     'halign':halign,
                     'valign':'center',
                     'tag': 'labels'

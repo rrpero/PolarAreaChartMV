@@ -66,7 +66,8 @@
         */
         this.properties =
         {
-            'chart.width':           1,
+            'chart.showvalues':		false,
+			'chart.width':           1,
 			'chart.funnel.horizontal':0,
 			'chart.strokestyle':           'rgba(0,0,0,0)',
             'chart.gutter.left':           25,
@@ -551,6 +552,9 @@
                     RG.NoShadow(this);
                     
                     var label = labels[j];
+					if(prop['chart.showvalues']){
+						label = label + " - " + this.data[j];
+					}
     
                     RG.text2(this,{'font':font,
                                    'size':size,
@@ -588,7 +592,9 @@
                 * This draws the last labels if defined
                 */
                 var lastLabel = labels[j];
-    
+				if(prop['chart.showvalues']){
+					lastLabel = lastLabel + " - " + this.data[j];
+				}   
                 if (lastLabel) {
 
                     RG.text2(this,{'font':font,
