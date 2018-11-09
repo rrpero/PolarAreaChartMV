@@ -15,7 +15,9 @@ requirejs.config({
 		"RGraph.radar": "../extensions/PolarAreaChartMV/libraries/RGraph.radar",
 		"RGraph.funnel": "../extensions/PolarAreaChartMV/libraries/RGraph.funnel",
 		"RGraph.waterfall": "../extensions/PolarAreaChartMV/libraries/RGraph.waterfall",
-		"RGraph.common.key": "../extensions/PolarAreaChartMV/libraries/RGraph.common.key"
+		"RGraph.common.key": "../extensions/PolarAreaChartMV/libraries/RGraph.common.key",
+		"d3":'../extensions/PolarAreaChartMV/libraries/d3',
+		"viz":'../extensions/PolarAreaChartMV/libraries/viz'
     },
  /*   shim: {
         "RGraph": {
@@ -48,27 +50,25 @@ define( [
 		'jquery'
 		,'qlik'
         ,'./properties/properties'
-		,'./properties/initialProperties',
-		"RGraph",
-		"RGraph.rosemv",
-		"RGraph.radar",
-		"RGraph.funnel",
-		"RGraph.waterfall",		
-		"RGraph.common.dynamic",
-		"RGraph.common.tooltips",
-		"RGraph.common.key"
-//		,'./libraries/RGraph.common.core'	
-//		,'./libraries/RGraph.common.dynamic'
-//		,'./libraries/RGraph.common.tooltips'
-//		,'./libraries/RGraph.rose'
-//		,'./libraries/RGraph.common.key'
+		,'./properties/initialProperties'
+		,'d3'
+		,'viz'		
+		,"RGraph"
+		,"RGraph.rosemv"
+		,"RGraph.radar"
+		,"RGraph.funnel"
+		,"RGraph.waterfall",	
+		,"RGraph.common.dynamic"
+		,"RGraph.common.tooltips"
+		,"RGraph.common.key"
 		,'./libraries/rainbowvis'
+		,'./biPartite'
 
 
 		
     ],
 	
-    function ( $, qlik, props, initProps) {
+    function ( $, qlik, props, initProps,d3,viz) {
         'use strict';	
 		//window.RGraph={isRGraph: true};
 		//Inject Stylesheet into header of current document
@@ -141,616 +141,663 @@ define( [
 				//props['items']['optionsSizeBorders']['items']['Options']['items']['axes']['show']=false;
 				//console.log(props['items']['optionsSizeBorders']['items']['Options']['items']['axes']);
 				setUndefined();
-				
+				// Get the Number of Dimensions and Measures on the hypercube
+				var numberOfDimensions = layout.qHyperCube.qDimensionInfo.length;
+				//console.log(numberOfDimensions);
+				var numberOfMeasures = layout.qHyperCube.qMeasureInfo.length;
+				//console.log(numberOfMeasures);				
 				
 
 			
 
 				var app = qlik.currApp(this);
-				var html="";
 				
-				// Get the Number of Dimensions and Measures on the hypercube
-				var numberOfDimensions = layout.qHyperCube.qDimensionInfo.length;
-				//console.log(numberOfDimensions);
-				var numberOfMeasures = layout.qHyperCube.qMeasureInfo.length;
-				//console.log(numberOfMeasures);
-				
-				// Get the Measure Name and the Dimension Name
-				var measureName = layout.qHyperCube.qMeasureInfo[0].qFallbackTitle;
-				//console.log(measureName);
-				
-				// Get the number of fields of a dimension
-				//var numberOfDimValues = layout.qHyperCube.qDataPages[0].qMatrix.length;
-				var numberOfDimValues = qMatrix.length;
-				//console.log("qMatrix.length: " + numberOfDimValues);				
-				
-				//var dimensionName = layout.qHyperCube.qDimensionInfo[0].qFallbackTitle;
-				//console.log(dimensionName);
-
-				
-
-				
-				//console.log(qMatrix);
-				//console.log(layout);
-				var numberOfItems = numberOfDimValues;
-				
-				//var numberOfItems = numberOfMeasures;
-				if(numberOfMeasures>1)
-						numberOfItems=numberOfMeasures;
-
-				
-				
-				
-				// Get the values of the dimension
-				var dimMeasArray=[];
-				var dimArray =[];
-				var measArrayNum =[];
-				var measArrayText =[];
-				var total= 0;
-
-				var newStructure ={};
-				if(numberOfDimensions>0 && numberOfMeasures <= 1)
+				if(layout.polar=="biPartite"){
+					if(numberOfDimensions==2 && numberOfMeasures==1)
+						biPartite(app,$element,layout,qMatrix,d3,viz);
+					else{
+						//To generate random numbers to allow multiple charts to present on one sheet:						
+						$element.html(getHtml(messages[language].BIPARTITE_DIMENSIONMEASURE));
+					}
+						
+				}
+				else 
 				{
-					for (var i=0; i<numberOfDimValues;i++){
-						newStructure[qMatrix[i][0].qText]={};
-						//[qMatrix[i][1].qText]=qMatrix[i][2].qNum;
-					}
 				
-					var newStructureDim2 ={};
-					for (var i=0; i<numberOfDimValues;i++){
-						newStructureDim2[qMatrix[i][1].qText]=qMatrix[i][1].qNum;
-						//console.log(Object.keys(newStructureDim2));
-						//[qMatrix[i][1].qText]=qMatrix[i][2].qNum;
-					}
-				}
-				else{
-				
-					var newStructureDim2 ={};
-					for (var i=0; i<numberOfDimValues;i++){
-						newStructureDim2[qMatrix[i][0].qText]={};
-
-					}
-					//console.log(layout.qHyperCube.qMeasureInfo);
+					var html="";
 					
-					for (var i=0; i<numberOfMeasures;i++){
-						newStructure[layout.qHyperCube.qMeasureInfo[i].qFallbackTitle]=layout.qHyperCube.qMeasureInfo[i].qMax;
-					}
-				}
-				
-				
-				var palette = createPalette(numberOfItems,newStructure,newStructureDim2);
-				
-			
-				
-				/** TODO Pedir decimal e milhar do QS **/
-				var  measArrayNum2 = [];
-				var paletteKeep = [];
-				var valueBelow = "--";
-				if(layout.valueBelow)
-					valueBelow = "\\n";
+					// Get the Number of Dimensions and Measures on the hypercube
+					var numberOfDimensions = layout.qHyperCube.qDimensionInfo.length;
+					//console.log(numberOfDimensions);
+					var numberOfMeasures = layout.qHyperCube.qMeasureInfo.length;
+					//console.log(numberOfMeasures);
+					
+					// Get the Measure Name and the Dimension Name
+					var measureName = layout.qHyperCube.qMeasureInfo[0].qFallbackTitle;
+					//console.log(measureName);
+					
+					// Get the number of fields of a dimension
+					//var numberOfDimValues = layout.qHyperCube.qDataPages[0].qMatrix.length;
+					var numberOfDimValues = qMatrix.length;
+					//console.log("qMatrix.length: " + numberOfDimValues);				
+					
+					//var dimensionName = layout.qHyperCube.qDimensionInfo[0].qFallbackTitle;
+					//console.log(dimensionName);
 
+					
 
-				if(numberOfDimensions==2 && numberOfMeasures <= 1){				
-					for(var  i  in newStructure){
-						//console.log(i);
-						for(var  j  in newStructureDim2){
-							newStructure[i][j]=0;
+					
+					//console.log(qMatrix);
+					//console.log(layout);
+					var numberOfItems = numberOfDimValues;
+					
+					//var numberOfItems = numberOfMeasures;
+					if(numberOfMeasures>1)
+							numberOfItems=numberOfMeasures;
+
+					
+					
+					
+					// Get the values of the dimension
+					var dimMeasArray=[];
+					var dimArray =[];
+					var measArrayNum =[];
+					var measArrayText =[];
+					var total= 0;
+
+					var newStructure ={};
+					if(numberOfDimensions>0 && numberOfMeasures <= 1)
+					{
+						for (var i=0; i<numberOfDimValues;i++){
+							newStructure[qMatrix[i][0].qText]={};
+							//[qMatrix[i][1].qText]=qMatrix[i][2].qNum;
 						}
-					}				
-
-
-					for (var i=0; i<numberOfDimValues;i++){
-						newStructure[qMatrix[i][0].qText][qMatrix[i][1].qText]=qMatrix[i][2].qNum;
-						//console.log(qMatrix[i][0].qText);
-						//console.log(qMatrix[i][1].qText);
-						//[qMatrix[i][1].qText]=qMatrix[i][2].qNum;
-					}
-
-					var  toolTipsArray = [];
-					var ix=0;
-					var itpx=0
-					for(var  i  in newStructure){
-						//console.log(i);
-						var arrayValuesDim2=[]
-						var tpuniq = [];
-						var jx=0;
-						for(var  j  in newStructureDim2){
-							total = total + parseFloat(newStructure[i][j]);
-							arrayValuesDim2[jx]=newStructure[i][j];
-							//tpuniq[jx]= i+" - " + j + " - " + newStructure[i][j];
-							
-							jx++;
-							toolTipsArray[itpx]=i+" - " + j + " - " + newStructure[i][j];
-							itpx++;
+					
+						var newStructureDim2 ={};
+						for (var i=0; i<numberOfDimValues;i++){
+							newStructureDim2[qMatrix[i][1].qText]=qMatrix[i][1].qNum;
+							//console.log(Object.keys(newStructureDim2));
+							//[qMatrix[i][1].qText]=qMatrix[i][2].qNum;
 						}
-						measArrayNum2[ix]=arrayValuesDim2;
-						//toolTipsArray[ix]=tpuniq;
-						ix++;
 					}
+					else{
+					
+						var newStructureDim2 ={};
+						for (var i=0; i<numberOfDimValues;i++){
+							newStructureDim2[qMatrix[i][0].qText]={};
 
-					
-				}
-				else if(numberOfDimensions==1 && numberOfMeasures <= 1){
-					
-					for(var  i  in newStructure){
-						newStructure[i]=0;
-					}	
-					for (var i=0; i<numberOfDimValues;i++){
-						newStructure[qMatrix[i][0].qText]=qMatrix[i][1].qNum;
-
-					}
-					
-					var  toolTipsArray = [];
-					var ix=0;
-					var itpx=0
-					for(var  i  in newStructure){
-						total = total + parseFloat(newStructure[i]);
+						}
+						//console.log(layout.qHyperCube.qMeasureInfo);
 						
-						//console.log(i);
-						var arrayValuesDim2//=[];
-
-						//arrayValuesDim2[ix]
-						=  newStructure[i];
-
-						toolTipsArray[itpx]=i+" - " + newStructure[i];
-						itpx++;
-						
-						measArrayNum2[ix]=arrayValuesDim2;
-						ix++;
-					}					
-					
-					
-				}
-				else
-				{
-					
-					var maxValue=0;
-					/*
-					for(var  i  in newStructure){
-						newStructure[i]=0;
-					}	
-					for (var i=0; i<numberOfDimValues;i++){
-						newStructure[qMatrix[i][0].qText]=qMatrix[i][1].qNum;
-
+						for (var i=0; i<numberOfMeasures;i++){
+							newStructure[layout.qHyperCube.qMeasureInfo[i].qFallbackTitle]=layout.qHyperCube.qMeasureInfo[i].qMax;
+						}
 					}
-					*/
-					var  toolTipsArray = [];
-					var ix=0;
-					var itpx=0
-					for(var  i  in newStructure){
-						total = total + parseFloat(newStructure[i]);
-						//console.log(i);
-						var arrayValuesDim2//=[];
-
-						//arrayValuesDim2[ix]
-						=  newStructure[i];
-
-						toolTipsArray[itpx]=i+" - " + newStructure[i];
-						itpx++;
-						
-						measArrayNum2[ix]=arrayValuesDim2;
-						if(arrayValuesDim2>maxValue)
-							maxValue=arrayValuesDim2;
-						ix++;
-					}					
 					
 					
-				}	
+					var palette = createPalette(numberOfItems,newStructure,newStructureDim2);
+					
 				
-				
+					
+					/** TODO Pedir decimal e milhar do QS **/
+					var  measArrayNum2 = [];
+					var paletteKeep = [];
+					var valueBelow = "--";
+					if(layout.valueBelow)
+						valueBelow = "\\n";
 
 
-				//console.log(toolTipsArray);				
-				
-
-				//console.log("new");
-				//console.log(newStructure);
-
-				//console.log("num dim values " + numberOfDimValues);
-				for (var i=0; i<numberOfDimValues;i++){
-
-					//paletteKeep[i]=palette[layout.qHyperCube.qDataPages[0].qMatrix[i][0].qElemNumber];
-					paletteKeep[i]=palette[qMatrix[i][0].qElemNumber];
-					//dimArray[i] = layout.qHyperCube.qDataPages[0].qMatrix[i][0].qText;
-					dimArray[i] = qMatrix[i][0].qText;
-					//console.log(qMatrix[i][1].qText+qMatrix[i][0].qText)
-					//if(dimArray[i]=="Thresh")
-					//console.log("Thresh  tem elem  number "  + qMatrix[i][0].qElemNumber);
-					//measArrayNum[i] = layout.qHyperCube.qDataPages[0].qMatrix[i][1].qNum;
-					measArrayNum[i] = qMatrix[i][1].qNum;
-					
-					//measArrayNum2[]
-					
-					//measArrayNum2[i]=[qMatrix[i][1].qNum,qMatrix[i][1].qNum/2];
-					
-					
-					//console.log(qMatrix[i][0]);
-					//console.log(qMatrix[i]);
-					//measArrayText[i] = layout.qHyperCube.qDataPages[0].qMatrix[i][1].qText;
-					measArrayText[i] = qMatrix[i][1].qText;
-					//dimMeasArray[i] = dimArray[i] + valueBelow +measArrayText[i];
-					dimMeasArray[i] = dimArray[i] + valueBelow +measArrayText[i];
-					
-					//total=total+parseFloat(measArrayNum[i]);	
-					//console.log(dimArray[i]+"-"+measArrayNum[i]);
-					
-				}
-				
-				
-				
-				//% to Only Values
-				var measArrayPerc = [];
-				//var measArrayValue = [];
-				
-				var dimMeasPercArray=[];
-				var dimMeasPercTPArray=[];			
-				
-				var origin=-Math.PI/2;
-				var originAcc = 0;
-				/*for (var i=0; i<numberOfDimValues;i++){
-					
-					
-					var measPercArray = (parseFloat(measArrayNum[i])/total)*100;
-										
-					measPercArray= parseFloat(measPercArray).toFixed(1);					
-					measArrayPerc[i]=measPercArray + "%";
-										
-					dimMeasPercArray[i] = dimArray[i] +valueBelow +measPercArray + "%";
-					dimMeasPercTPArray[i] = dimensionName+'</br>' +
-											'<div style="color:' + palette[i]+';">' + dimArray[i]+": " +measArrayText[i]+"</div>" +
-											"Percentual: " + measPercArray + "%";
-								
-				}*/
-
-				var dimensionLength=qMatrix.length;
-								
-				//To generate random numbers to allow multiple charts to present on one sheet:
-				function guid() {return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();};
-				function s4() {return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);};
-				var tmpCVSID = guid();
-					
-
-				function capitalize(str) {
-				
-					if(layout.capitalize=="capitalize"){
-						return str
-							.toLowerCase()
-							.split(' ')
-							.map(function(word) {
-								//console.log("First capital letter: "+word[0]);
-								//console.log("remain letters: "+ word.substr(1));
-								return word[0].toUpperCase() + word.substr(1);
-							})
-							.join(' ');
-					}
-					return str.toUpperCase();
-				}
-
-					
-				var hashCode = function(str){
-					var hash = 0;
-					if (str.length == 0) return hash;
-					for (i = 0; i < str.length; i++) {
-						var char = str.charCodeAt(i);
-						hash = ((hash<<5)-hash)+char;
-						hash = hash & hash; // Convert to 32bit integer
-					}
-					//console.log(Math.abs(hash));
-					return Math.abs(hash);
-				}
-
-				var html = '';			
-				var width = $element.width(), height = $element.height();
-				// add canvas for chart			
-				html+='<div style="background-color: '+ layout.backgroundColor.color +';" id="canvas-wrapper-'+tmpCVSID+'"><canvas id="' + tmpCVSID + '" width="'+width+'" height="'+height+'">[No canvas support]</canvas></div><div id="myKey-'+tmpCVSID+'"></div>';
-//onsole.log(html);
-
-
-				$element.html(html);
-				
-				
-				var testRadius = width;
-				if(width>height)
-					testRadius=height;
-				testRadius=testRadius*(layout.chartRadius/275);
-				
-				//console.log(parseInt(testRadius*0.04));
-				//console.log((layout.labelTextSize/100));
-				
-				var labelTextSize = parseInt(testRadius*0.06)*(layout.labelTextSize/50);
-				//console.log(labelTextSize);
-				if(labelTextSize< 7)
-					labelTextSize=7;				
-				
-				
-				//RGraph.Reset(document.getElementById(tmpCVSID));
-				var min = Math.min.apply(null, measArrayNum),
-				max = Math.max.apply(null, measArrayNum);
-				
-				var diffMaxMin = max - min;
-				
-
-				
-				var  maxTextSize = 20-layout.maxTextSize;
-				if(width>height){
-					tamanho=height;
-					var  tamanho2=height/maxTextSize;
-					//if((width/1.5)>height)
-					//	var tamanho=height/2;
-					
-				}
-				else{
-					var tamanho=width;
-					var  tamanho2=width/maxTextSize;
-					//if((height/1.5)>=width)
-					//	var tamanho=width/2;
-				}
-				
-				if(measArrayNum.length>50)
-					tamanho2=tamanho2-(tamanho2/5);
-				
-				tamanho=tamanho * (Math.log(measArrayNum.length)); 
-				//console.log("LOG: " + Math.log(1000000*measArrayNum.length));
-				//tamanho = height+width;				
-				var fontMax =  5 + ((max/total)*tamanho);
-
-					
-				/*
-				//console.log(dimArray.map(function(d,i) {
-					  return {text: d, size: 10+measArrayNum[i], test: "haha"};
-					}));*/
-				var padding=3;
-				if(layout.border)
-					padding=padding+1;
-				var font="QlikView Sans";
-				//console.log(measArrayNum2);
-				//console.log(Object.keys(newStructure));
-				
-				var keys = (numberOfDimensions==2&&numberOfMeasures<2)?Object.keys(newStructureDim2):Object.keys(newStructure);
-				if (layout.chartLabels) {
-					var labelsArray = Object.keys(newStructure);
-					//var labelDimMeasArray =dimArray;
-					
-					/*if(layout.showValues=="value"||layout.showValues=="percent"){
-						var labelsArray = Object.keys(newStructure);
-						if(layout.onlyValues)
-							labelsArray=measArrayText;		
-						if(layout.showValues=="percent"){
-							var labelsArray = dimMeasPercArray;
-							if(layout.onlyValues)
-								labelsArray=measArrayPerc;						
-							//var labelDimMeasArray = dimMeasPercTPArray;
+					if(numberOfDimensions==2 && numberOfMeasures <= 1){				
+						for(var  i  in newStructure){
+							//console.log(i);
+							for(var  j  in newStructureDim2){
+								newStructure[i][j]=0;
+							}
 						}				
-						}*/	
-				
 
-				} else {
-					var labelsArray = null;
-					//var labelDimMeasArray =[];
-				}
-				
-				var labelAxes=layout.upScale+layout.downScale+layout.leftScale+layout.rightScale;
-				if(labelAxes=="")
-					labelAxes="";
-				
-				
-				
-				if(typeof(layout.grid)=="boolean")
-					layout.grid=5;
-				if(layout.grid<0)
-					layout.grid=0;
-				//console.log(layout.grid+0);
-				
-				
-				//console.log(measArrayNum2);
-				//console.log(testRadius);
 
-				if(layout.polar=="waterfall"){
-					labelsArray.push("Total");
-					toolTipsArray.push("Total - " + total);
-					var rose = new RGraph.Waterfall({
-						id: tmpCVSID,
-						data: measArrayNum2,
-						options: {
-							labels: labelsArray,
-							textAccessible: true,
-							textFont:'QlikView Sans',
-							labelsBoxed:false,
-							textSize: labelTextSize	,
-							colors: palette	,
-							gutterTop: 10,
-							gutterLeft: layout.gutterLeft+(0.5*testRadius),
-							gutterBottom: layout.gutterTop+(0.5*testRadius),
-							tooltips:function (idx)
-							{
-								return '<div id="__tooltip_div__">'+toolTipsArray[idx]+'</div>';
-									   //'s stats<br/><canvas id="__tooltip_canvas__" width="400" height="150">='
-									   //'[No canvas support]</canvas>';
-							},
-							tooltipsEvent: 'onmousemove'
+						for (var i=0; i<numberOfDimValues;i++){
+							newStructure[qMatrix[i][0].qText][qMatrix[i][1].qText]=qMatrix[i][2].qNum;
+							//console.log(qMatrix[i][0].qText);
+							//console.log(qMatrix[i][1].qText);
+							//[qMatrix[i][1].qText]=qMatrix[i][2].qNum;
 						}
-					}).draw();					
-					
-				}
-				else if(layout.polar=="funnel"){
-					
-					    // Create the Funnel chart. Note the the values start at the maximum and decrease to the minimum.
-					//console.log(palette);
-					var rose = new RGraph.Funnel({
-						id: tmpCVSID,
-						data: measArrayNum2,
-						options: {
-							textBoxed: false,
-							//title: 'Leads through to sales',
-							labels: labelsArray,
-							showvalues:layout.showvalues,
-							shadow: true,
-							labelsSticks:true,
-							width:(width/2)/testRadius,
-							textFont:'QlikView Sans',
-							labelsBoxed:false,
-							textSize: labelTextSize,
-							funnelHorizontal:layout.gutterLeft,
-							colors: palette,
-							tooltips:function (idx)
-							{
-								return '<div id="__tooltip_div__">'+toolTipsArray[idx]+'</div>';
-									   //'s stats<br/><canvas id="__tooltip_canvas__" width="400" height="150">='
-									   //'[No canvas support]</canvas>';
-							},
-							tooltipsEvent: 'onmousemove'//,
-							//gutterLeft: layout.showLegends ? layout.gutterLeft+190: layout.gutterLeft
-						}
-					}).draw();
-				}
-				else if(layout.polar=="radar"){
-					
-					
-					var rose =  new RGraph.Radar({
-						width:100,
-						id: tmpCVSID,
-						data: measArrayNum2,
-						options: {
-							labels: keys,
-							labelsBold:true,
-							textAccessible: true,
-							gutterLeft: layout.showLegends ? layout.gutterLeft+190: layout.gutterLeft,
-							gutterRight: 100,
-							gutterTop: layout.gutterTop,
-							gutterBottom: 50,
-							backgroundCircles: true,
-							backgroundCirclesColor:'#000',
-							backgroundCirclesCount:layout.grid,
-							backgroundCirclesPoly:true,							
-							//strokestyle: ['black'],
-							linewidth:2,
-							
-							backgroundAxes:layout.axes,
-							radius:testRadius,	
-							textFont:'QlikView Sans',
-							labelsBoxed:false,
-							textSize: labelTextSize,
-							colors:palette,
-							tooltips:function (idx)
-							{
-								return '<div id="__tooltip_div__">'+toolTipsArray[idx]+'</div>';
-									   //'s stats<br/><canvas id="__tooltip_canvas__" width="400" height="150">='
-									   //'[No canvas support]</canvas>';
-							},
-							tooltipsEvent: 'onmousemove'
-						}
-					}).draw();
-				}
-				else
-				{
-					//rainbow.setNumberRange(0, keys.length+1);
-					//palette=getPalette(rainbow);
-					//console.log(palette);
-					var rose = new RGraph.RoseMV({
-						//id: 'canvas-wrapper-'+tmpCVSID,
-						id: tmpCVSID,
-						data: measArrayNum2,
-						options: {
-							//variant: 'non-equi-angular',
-							gutterLeft: layout.showLegends ? layout.gutterLeft+190: layout.gutterLeft,
-							gutterRight: 100,
-							gutterTop: layout.gutterTop,
-							gutterBottom: 50,
-							backgroundGridRadials:layout.gridRadials,
-							//backgroundGridCount:layout.grid?layout.grid:0,
-							backgroundGridCount:layout.grid,
-							backgroundGrid:true,
-							
-							backgroundAxes:layout.axes,
-							radius:testRadius,
-							labelsAxes:layout.upScale+layout.downScale+layout.leftScale+layout.rightScale,
-							labelsCount:layout.stepScale,
-							ymax:maxValue,
-							//labelsPosition:'edge',
-							textFont:'QlikView Sans',
-							labelsBoxed:false,
-							textSize: labelTextSize,
-							textSizeScale:Math.floor(labelTextSize*0.7),
-							backgroundGridColor: 'rgba(155,155,155,1)',//'#989080',
-							//tooltips: toolTipsArray,
-							tooltips:function (idx)
-							{
-								return '<div id="__tooltip_div__">'+toolTipsArray[idx]+'</div>';
-									   //'s stats<br/><canvas id="__tooltip_canvas__" width="400" height="150">='
-									   //'[No canvas support]</canvas>';
-								},
-							tooltipsEvent: 'onmousemove',
-							colorsSequential: (numberOfDimensions==2 && numberOfMeasures<2)?false:true,
-							//colorsSequential: true,
-							colors: palette,
-							linewidth: 0,
-							labels: labelsArray,
-							showvalues:layout.showvalues,
-							labelsApprox:layout.labelsApprox,
-							//exploded: 3,
-							//strokestyle:'rgba(0,0,0,0.8)',
-							backgroundGridLinewidth:1,
-							key:layout.showLegends ? keys: null,
-							keyHalign:"right",
-							keyPositionX:layout.keyPositionX,
-							keyPositionY:layout.keyPositionY,
-							keyPositionGraphBoxed:false,
-							keyPosition:layout.graphGutter,
-							keyTextBold:true,
-							keyTextSize:labelTextSize-2,						
-							eventsClick: onClickDimension
-						}
-					}).draw();
-				}
-				rose.on('tooltip', function (obj)
-				{
-					//console.log(obj);
-					
-					//var tooltip = obj.get('tooltips');
-					//var colors  = rose.properties.colors;
-					
-					//$("#__tooltip_div__").css('border','4px solid ' + colors[obj.__index__]);
-					//tooltip.style.border = '4px solid ' + colors[obj.__index__]
-				});
-				
-				RGraph.tooltips.style.backgroundColor = 'white';
-				RGraph.tooltips.style.color           = 'black';
-				RGraph.tooltips.style.fontWeight      = 'bold';
-				RGraph.tooltips.style.boxShadow       = 'none';
-				
-				
-				
-				rose.canvas.onmouseout = function (e)
-				{
-					// Hide the tooltip
-					RGraph.hideTooltip();
-					
-					// Redraw the canvas so that any highlighting is gone
-					RGraph.redraw();
-				}
-				//needed for export
-				
-				function onClickDimension (e, shape)
-				{
-					var index = shape.index;
-					//alert(dimensionName);
-					//console.log(index);
-					var ix=0;
-					for(var  i in newStructure){
-						for(var  j in newStructure[i]){
-							if(ix==index)
-								app.field(dimensionName).toggleSelect(i, true);
+
+						var  toolTipsArray = [];
+						var ix=0;
+						var itpx=0
+						for(var  i  in newStructure){
+							//console.log(i);
+							var arrayValuesDim2=[]
+							var tpuniq = [];
+							var jx=0;
+							for(var  j  in newStructureDim2){
+								total = total + parseFloat(newStructure[i][j]);
+								arrayValuesDim2[jx]=newStructure[i][j];
+								//tpuniq[jx]= i+" - " + j + " - " + newStructure[i][j];
+								
+								jx++;
+								toolTipsArray[itpx]=i+" - " + j + " - " + newStructure[i][j];
+								itpx++;
+							}
+							measArrayNum2[ix]=arrayValuesDim2;
+							//toolTipsArray[ix]=tpuniq;
 							ix++;
 						}
-						//console.log(i);
+
+						
 					}
-					//if(index==1)
+					else if(numberOfDimensions==1 && numberOfMeasures <= 1){
+						
+						for(var  i  in newStructure){
+							newStructure[i]=0;
+						}	
+						for (var i=0; i<numberOfDimValues;i++){
+							newStructure[qMatrix[i][0].qText]=qMatrix[i][1].qNum;
+
+						}
+						
+						var  toolTipsArray = [];
+						var ix=0;
+						var itpx=0
+						for(var  i  in newStructure){
+							total = total + parseFloat(newStructure[i]);
+							
+							//console.log(i);
+							var arrayValuesDim2//=[];
+
+							//arrayValuesDim2[ix]
+							=  newStructure[i];
+
+							toolTipsArray[itpx]=i+" - " + newStructure[i];
+							itpx++;
+							
+							measArrayNum2[ix]=arrayValuesDim2;
+							ix++;
+						}					
+						
+						
+					}
+					else
+					{
+						
+						var maxValue=0;
+						/*
+						for(var  i  in newStructure){
+							newStructure[i]=0;
+						}	
+						for (var i=0; i<numberOfDimValues;i++){
+							newStructure[qMatrix[i][0].qText]=qMatrix[i][1].qNum;
+
+						}
+						*/
+						var  toolTipsArray = [];
+						var ix=0;
+						var itpx=0
+						for(var  i  in newStructure){
+							total = total + parseFloat(newStructure[i]);
+							//console.log(i);
+							var arrayValuesDim2//=[];
+
+							//arrayValuesDim2[ix]
+							=  newStructure[i];
+
+							toolTipsArray[itpx]=i+" - " + newStructure[i];
+							itpx++;
+							
+							measArrayNum2[ix]=arrayValuesDim2;
+							if(arrayValuesDim2>maxValue)
+								maxValue=arrayValuesDim2;
+							ix++;
+						}					
+						
+						
+					}	
 					
-					//app.field(dimensionName).toggleSelect(dimArray[index], true);
-					return  true;
-				}				
+					
+
+
+					//console.log(toolTipsArray);				
+					
+
+					//console.log("new");
+					//console.log(newStructure);
+
+					//console.log("num dim values " + numberOfDimValues);
+					for (var i=0; i<numberOfDimValues;i++){
+
+						//paletteKeep[i]=palette[layout.qHyperCube.qDataPages[0].qMatrix[i][0].qElemNumber];
+						paletteKeep[i]=palette[qMatrix[i][0].qElemNumber];
+						//dimArray[i] = layout.qHyperCube.qDataPages[0].qMatrix[i][0].qText;
+						dimArray[i] = qMatrix[i][0].qText;
+						//console.log(qMatrix[i][1].qText+qMatrix[i][0].qText)
+						//if(dimArray[i]=="Thresh")
+						//console.log("Thresh  tem elem  number "  + qMatrix[i][0].qElemNumber);
+						//measArrayNum[i] = layout.qHyperCube.qDataPages[0].qMatrix[i][1].qNum;
+						measArrayNum[i] = qMatrix[i][1].qNum;
+						
+						//measArrayNum2[]
+						
+						//measArrayNum2[i]=[qMatrix[i][1].qNum,qMatrix[i][1].qNum/2];
+						
+						
+						//console.log(qMatrix[i][0]);
+						//console.log(qMatrix[i]);
+						//measArrayText[i] = layout.qHyperCube.qDataPages[0].qMatrix[i][1].qText;
+						measArrayText[i] = qMatrix[i][1].qText;
+						//dimMeasArray[i] = dimArray[i] + valueBelow +measArrayText[i];
+						dimMeasArray[i] = dimArray[i] + valueBelow +measArrayText[i];
+						
+						//total=total+parseFloat(measArrayNum[i]);	
+						//console.log(dimArray[i]+"-"+measArrayNum[i]);
+						
+					}
+					
+					
+					
+					//% to Only Values
+					var measArrayPerc = [];
+					//var measArrayValue = [];
+					
+					var dimMeasPercArray=[];
+					var dimMeasPercTPArray=[];			
+					
+					var origin=-Math.PI/2;
+					var originAcc = 0;
+					/*for (var i=0; i<numberOfDimValues;i++){
+						
+						
+						var measPercArray = (parseFloat(measArrayNum[i])/total)*100;
+											
+						measPercArray= parseFloat(measPercArray).toFixed(1);					
+						measArrayPerc[i]=measPercArray + "%";
+											
+						dimMeasPercArray[i] = dimArray[i] +valueBelow +measPercArray + "%";
+						dimMeasPercTPArray[i] = dimensionName+'</br>' +
+												'<div style="color:' + palette[i]+';">' + dimArray[i]+": " +measArrayText[i]+"</div>" +
+												"Percentual: " + measPercArray + "%";
+									
+					}*/
+
+					var dimensionLength=qMatrix.length;
+									
+					//To generate random numbers to allow multiple charts to present on one sheet:
+					function guid() {return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();};
+					function s4() {return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);};
+					var tmpCVSID = guid();
+						
+
+					function capitalize(str) {
+					
+						if(layout.capitalize=="capitalize"){
+							return str
+								.toLowerCase()
+								.split(' ')
+								.map(function(word) {
+									//console.log("First capital letter: "+word[0]);
+									//console.log("remain letters: "+ word.substr(1));
+									return word[0].toUpperCase() + word.substr(1);
+								})
+								.join(' ');
+						}
+						return str.toUpperCase();
+					}
+
+						
+					var hashCode = function(str){
+						var hash = 0;
+						if (str.length == 0) return hash;
+						for (i = 0; i < str.length; i++) {
+							var char = str.charCodeAt(i);
+							hash = ((hash<<5)-hash)+char;
+							hash = hash & hash; // Convert to 32bit integer
+						}
+						//console.log(Math.abs(hash));
+						return Math.abs(hash);
+					}
+
+					var html = '';			
+					var width = $element.width(), height = $element.height();
+					// add canvas for chart			
+					html+='<div style="background-color: '+ layout.backgroundColor.color +';" id="canvas-wrapper-'+tmpCVSID+'"><canvas id="' + tmpCVSID + '" width="'+width+'" height="'+height+'">[No canvas support]</canvas></div><div id="myKey-'+tmpCVSID+'"></div>';
+	//onsole.log(html);
+
+
+					$element.html(html);
+					
+					
+					var testRadius = width;
+					if(width>height)
+						testRadius=height;
+					testRadius=testRadius*(layout.chartRadius/275);
+					
+					//console.log(parseInt(testRadius*0.04));
+					//console.log((layout.labelTextSize/100));
+					
+					var labelTextSize = parseInt(testRadius*0.06)*(layout.labelTextSize/50);
+					//console.log(labelTextSize);
+					if(labelTextSize< 7)
+						labelTextSize=7;				
+					
+					
+					//RGraph.Reset(document.getElementById(tmpCVSID));
+					var min = Math.min.apply(null, measArrayNum),
+					max = Math.max.apply(null, measArrayNum);
+					
+					var diffMaxMin = max - min;
+					
+
+					
+					var  maxTextSize = 20-layout.maxTextSize;
+					if(width>height){
+						tamanho=height;
+						var  tamanho2=height/maxTextSize;
+						//if((width/1.5)>height)
+						//	var tamanho=height/2;
+						
+					}
+					else{
+						var tamanho=width;
+						var  tamanho2=width/maxTextSize;
+						//if((height/1.5)>=width)
+						//	var tamanho=width/2;
+					}
+					
+					if(measArrayNum.length>50)
+						tamanho2=tamanho2-(tamanho2/5);
+					
+					tamanho=tamanho * (Math.log(measArrayNum.length)); 
+					//console.log("LOG: " + Math.log(1000000*measArrayNum.length));
+					//tamanho = height+width;				
+					var fontMax =  5 + ((max/total)*tamanho);
+
+						
+					/*
+					//console.log(dimArray.map(function(d,i) {
+						  return {text: d, size: 10+measArrayNum[i], test: "haha"};
+						}));*/
+					var padding=3;
+					if(layout.border)
+						padding=padding+1;
+					var font="QlikView Sans";
+					//console.log(measArrayNum2);
+					//console.log(Object.keys(newStructure));
+					
+					var keys = (numberOfDimensions==2&&numberOfMeasures<2)?Object.keys(newStructureDim2):Object.keys(newStructure);
+					if (layout.chartLabels) {
+						var labelsArray = Object.keys(newStructure);
+						//var labelDimMeasArray =dimArray;
+						
+						/*if(layout.showValues=="value"||layout.showValues=="percent"){
+							var labelsArray = Object.keys(newStructure);
+							if(layout.onlyValues)
+								labelsArray=measArrayText;		
+							if(layout.showValues=="percent"){
+								var labelsArray = dimMeasPercArray;
+								if(layout.onlyValues)
+									labelsArray=measArrayPerc;						
+								//var labelDimMeasArray = dimMeasPercTPArray;
+							}				
+							}*/	
+					
+
+					} else {
+						var labelsArray = null;
+						//var labelDimMeasArray =[];
+					}
+					
+					var labelAxes=layout.upScale+layout.downScale+layout.leftScale+layout.rightScale;
+					if(labelAxes=="")
+						labelAxes="";
+					
+					
+					
+					if(typeof(layout.grid)=="boolean")
+						layout.grid=5;
+					if(layout.grid<0)
+						layout.grid=0;
+					//console.log(layout.grid+0);
+					
+					
+					//console.log(measArrayNum2);
+					//console.log(testRadius);
+
+					if(layout.polar=="waterfall"){
+						
+						if((layout.qHyperCube.qDimensionInfo.length==1 && layout.qHyperCube.qMeasureInfo.length==1) ||
+						layout.qHyperCube.qMeasureInfo.length>1 && layout.qHyperCube.qDimensionInfo.length==0){
+							labelsArray.push("Total");
+							toolTipsArray.push("Total - " + total);
+							var rose = new RGraph.Waterfall({
+								id: tmpCVSID,
+								data: measArrayNum2,
+								options: {
+									labels: labelsArray,
+									textAccessible: true,
+									textFont:'QlikView Sans',
+									labelsBoxed:false,
+									textSize: labelTextSize	,
+									colors: palette	,
+									gutterTop: 10,
+									gutterLeft: layout.gutterLeft+(0.5*testRadius),
+									gutterBottom: layout.gutterTop+(0.5*testRadius),
+									tooltips:function (idx)
+									{
+										return '<div id="__tooltip_div__">'+toolTipsArray[idx]+'</div>';
+											   //'s stats<br/><canvas id="__tooltip_canvas__" width="400" height="150">='
+											   //'[No canvas support]</canvas>';
+									},
+									tooltipsEvent: 'onmousemove'
+								}
+							}).draw();
+						}
+						else
+						{
+							$element.html(getHtml(messages[language].WATERFALL_DIMENSIONMEASURE));
+						}
+						
+					}
+					else if(layout.polar=="funnel"){
+						
+						if((layout.qHyperCube.qDimensionInfo.length==1 && layout.qHyperCube.qMeasureInfo.length==1) ||
+						layout.qHyperCube.qMeasureInfo.length>1 && layout.qHyperCube.qDimensionInfo.length==0){
+							// Create the Funnel chart. Note the the values start at the maximum and decrease to the minimum.
+							//console.log(palette);
+							var rose = new RGraph.Funnel({
+								id: tmpCVSID,
+								data: measArrayNum2,
+								options: {
+									textBoxed: false,
+									//title: 'Leads through to sales',
+									labels: labelsArray,
+									showvalues:layout.showvalues,
+									shadow: true,
+									labelsSticks:true,
+									width:(width/2)/testRadius,
+									textFont:'QlikView Sans',
+									labelsBoxed:false,
+									textSize: labelTextSize,
+									funnelHorizontal:layout.gutterLeft,
+									colors: palette,
+									tooltips:function (idx)
+									{
+										return '<div id="__tooltip_div__">'+toolTipsArray[idx]+'</div>';
+											   //'s stats<br/><canvas id="__tooltip_canvas__" width="400" height="150">='
+											   //'[No canvas support]</canvas>';
+									},
+									tooltipsEvent: 'onmousemove'//,
+									//gutterLeft: layout.showLegends ? layout.gutterLeft+190: layout.gutterLeft
+								}
+							}).draw();
+						}
+						else
+						{
+							$element.html(getHtml(messages[language].FUNNEL_DIMENSIONMEASURE));
+						}
+					}
+					else if(layout.polar=="radar"){
+						
+						
+						var rose =  new RGraph.Radar({
+							width:100,
+							id: tmpCVSID,
+							data: measArrayNum2,
+							options: {
+								labels: keys,
+								labelsBold:true,
+								textAccessible: true,
+								gutterLeft: layout.showLegends ? layout.gutterLeft+190: layout.gutterLeft,
+								gutterRight: 100,
+								gutterTop: layout.gutterTop,
+								gutterBottom: 50,
+								backgroundCircles: true,
+								backgroundCirclesColor:'#000',
+								backgroundCirclesCount:layout.grid,
+								backgroundCirclesPoly:true,							
+								//strokestyle: ['black'],
+								linewidth:2,
+								
+								backgroundAxes:layout.axes,
+								radius:testRadius,	
+								textFont:'QlikView Sans',
+								labelsBoxed:false,
+								textSize: labelTextSize,
+								colors:palette,
+								tooltips:function (idx)
+								{
+									return '<div id="__tooltip_div__">'+toolTipsArray[idx]+'</div>';
+										   //'s stats<br/><canvas id="__tooltip_canvas__" width="400" height="150">='
+										   //'[No canvas support]</canvas>';
+								},
+								tooltipsEvent: 'onmousemove'
+							}
+						}).draw();
+					}
+					else
+					{
+						//rainbow.setNumberRange(0, keys.length+1);
+						//palette=getPalette(rainbow);
+						//console.log(palette);
+						var rose = new RGraph.RoseMV({
+							//id: 'canvas-wrapper-'+tmpCVSID,
+							id: tmpCVSID,
+							data: measArrayNum2,
+							options: {
+								//variant: 'non-equi-angular',
+								gutterLeft: layout.showLegends ? layout.gutterLeft+190: layout.gutterLeft,
+								gutterRight: 100,
+								gutterTop: layout.gutterTop,
+								gutterBottom: 50,
+								backgroundGridRadials:layout.gridRadials,
+								//backgroundGridCount:layout.grid?layout.grid:0,
+								backgroundGridCount:layout.grid,
+								backgroundGrid:true,
+								
+								backgroundAxes:layout.axes,
+								radius:testRadius,
+								labelsAxes:layout.upScale+layout.downScale+layout.leftScale+layout.rightScale,
+								labelsCount:layout.stepScale,
+								ymax:maxValue,
+								//labelsPosition:'edge',
+								textFont:'QlikView Sans',
+								labelsBoxed:false,
+								textSize: labelTextSize,
+								textSizeScale:Math.floor(labelTextSize*0.7),
+								backgroundGridColor: 'rgba(155,155,155,1)',//'#989080',
+								//tooltips: toolTipsArray,
+								tooltips:function (idx)
+								{
+									return '<div id="__tooltip_div__">'+toolTipsArray[idx]+'</div>';
+										   //'s stats<br/><canvas id="__tooltip_canvas__" width="400" height="150">='
+										   //'[No canvas support]</canvas>';
+									},
+								tooltipsEvent: 'onmousemove',
+								colorsSequential: (numberOfDimensions==2 && numberOfMeasures<2)?false:true,
+								//colorsSequential: true,
+								colors: palette,
+								linewidth: 0,
+								labels: labelsArray,
+								showvalues:layout.showvalues,
+								labelsApprox:layout.labelsApprox,
+								//exploded: 3,
+								//strokestyle:'rgba(0,0,0,0.8)',
+								backgroundGridLinewidth:1,
+								key:layout.showLegends ? keys: null,
+								keyHalign:"right",
+								keyPositionX:layout.keyPositionX,
+								keyPositionY:layout.keyPositionY,
+								keyPositionGraphBoxed:false,
+								keyPosition:layout.graphGutter,
+								keyTextBold:true,
+								keyTextSize:labelTextSize-2,						
+								eventsClick: onClickDimension
+							}
+						}).draw();
+					}
+					rose.on('tooltip', function (obj)
+					{
+						//console.log(obj);
+						
+						//var tooltip = obj.get('tooltips');
+						//var colors  = rose.properties.colors;
+						
+						//$("#__tooltip_div__").css('border','4px solid ' + colors[obj.__index__]);
+						//tooltip.style.border = '4px solid ' + colors[obj.__index__]
+					});
+					
+					RGraph.tooltips.style.backgroundColor = 'white';
+					RGraph.tooltips.style.color           = 'black';
+					RGraph.tooltips.style.fontWeight      = 'bold';
+					RGraph.tooltips.style.boxShadow       = 'none';
+					
+					
+					
+					rose.canvas.onmouseout = function (e)
+					{
+						// Hide the tooltip
+						RGraph.hideTooltip();
+						
+						// Redraw the canvas so that any highlighting is gone
+						RGraph.redraw();
+					}
+					//needed for export
+					
+					function onClickDimension (e, shape)
+					{
+						var index = shape.index;
+						//alert(dimensionName);
+						//console.log(index);
+						var ix=0;
+						for(var  i in newStructure){
+							for(var  j in newStructure[i]){
+								if(ix==index)
+									app.field(dimensionName).toggleSelect(i, true);
+								ix++;
+							}
+							//console.log(i);
+						}
+						//if(index==1)
+						
+						//app.field(dimensionName).toggleSelect(dimArray[index], true);
+						return  true;
+					}	
+				}					
 				return qlik.Promise.resolve();	
 			 }
+			 
+			 
+			function getHtml(chartTypeMessage){
+				function guid() {return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();};
+				function s4() {return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);};
+				var tmpCVSID = guid();						
+				var html = '';			
+				//var width = $element.width(), height = $element.height();
+				// add canvas for chart			
+				html+='<div style="background-color: #AAAAAA;" id="canvas-wrapper-'+tmpCVSID+'">'
+							+chartTypeMessage+
+					  '</div>';
+				return html;
+			}
 			 
 			function createPalette(numberOfItems,newStructure,newStructureDim2){
 					
@@ -881,6 +928,74 @@ define( [
 					layout.rightScale="e";	
 				if(typeof(layout.stepScale) == "undefined")
 					layout.stepScale=5;	
+				
+				/*
+				*/
+				if(typeof(layout.fontColor) == "undefined"){
+					layout.fontColor={};				
+					//layout.fontColor['color']="white;"
+					layout.fontColor['color']="#190000;"
+				}
+				/*
+				//inicio bipartite
+				if(typeof(layout.pad) == "undefined"){
+						layout.pad=3;
+				}
+				if(typeof(layout.spaceLabelLeft) == "undefined"){
+						layout.spaceLabelLeft=2;
+				}
+				if(typeof(layout.spaceLabelRight) == "undefined"){
+						layout.spaceLabelRight=2;
+				}
+				if(typeof(layout.posX) == "undefined"){
+						layout.posX=0;
+				}
+				if(typeof(layout.posY) == "undefined"){
+						layout.posY=0;
+				}				
+				if(typeof(layout.width) == "undefined"){
+						layout.width=8;
+				}
+				if(typeof(layout.height) == "undefined"){
+						layout.height=8;
+				}				
+				if(typeof(layout.labelIn) == "undefined"){
+						layout.labelIn="out";
+				}				
+				if(typeof(layout.barSize) == "undefined"){
+						layout.barSize=0;
+				}				
+				if(typeof(layout.fontColor) == "undefined"){
+					layout.fontColor={};				
+					//layout.fontColor['color']="white;"
+					layout.fontColor['color']="#190000;"
+				}
+				if(typeof(layout.fontSizeLabel) == "undefined")
+					layout.fontSizeLabel=12;				
+				if(typeof(layout.minTextSize) == "undefined")
+					layout.minTextSize=15;	
+				if(typeof(layout.maxTextSize) == "undefined")
+					layout.maxTextSize=16;	
+				if(typeof(layout.palette) == "undefined")
+					layout.palette="analogue1";	
+				if(typeof(layout.border) == "undefined")
+					layout.border=false;
+				if(typeof(layout.backgroundColor) == "undefined"){
+					layout.backgroundColor={};				
+					layout.backgroundColor['color']="white;"
+					layout.backgroundColor['color']="rgba(255,255,255,0);"
+				}
+				if(typeof(layout.bold) == "undefined")
+					layout.bold="bold";				
+				if(typeof(layout.capitalize) == "undefined")
+					layout.capitalize="upper";	
+				if(typeof(layout.labelTextSize) == "undefined")
+					layout.labelTextSize=100;	
+	
+				if(typeof(layout.labelDistance) == "undefined")
+					layout.labelDistance=10;
+				//fim bipartite
+				*/
 				 
 			 }
 		}	

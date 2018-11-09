@@ -3,20 +3,14 @@ define( [
 	'jquery',
 	'qlik',
 	'ng!$q',
-	'ng!$http'
+	'ng!$http',
+	'../messages'
 
 
 ], function ($, qlik, $q, $http) {
     'use strict';
 	//Define the current application
-	var messages = {
-		en_US: {
-					
-		},
-		pt_BR: {
-				
-		}
-	};
+
 	var language="pt_BR";
 	//var language="en_US";
 	var app = qlik.currApp();
@@ -143,7 +137,11 @@ define( [
 	messages[language].POLAR = "Polar";
 	messages[language].RADAR = "Radar";
 	messages[language].FUNNEL = "Pirâmide";
-	messages[language].WATERFALL = "Waterfall";	
+	messages[language].WATERFALL = "Waterfall";			
+	//messages[language].CHORD = "Chord";
+	messages[language].BIPARTITE = "Bipartido";
+
+	
 	var polar = {
 		type: "string",
 		component: "dropdown",
@@ -152,7 +150,11 @@ define( [
 		options: [{
 			value: "polar",
 			label: messages[language].POLAR
-		}/*, {
+		}, 
+		{
+			value: "biPartite",
+			label: messages[language].BIPARTITE
+		}, {
 			value: "radar",
 			label: messages[language].RADAR
 		}, {
@@ -161,7 +163,7 @@ define( [
 		}, {
 			value: "waterfall",
 			label: messages[language].WATERFALL
-		}*/],
+		}],
 		defaultValue: "polar"
 	};	
 	
@@ -217,25 +219,6 @@ define( [
 		//expression: "always",
 		defaultValue: 1
 	};		
-
-	messages[language].BOLD = "Negrito";
-	messages[language].NORMAL = "Normal";
-	var bold = {
-			type: "string",
-			component: "dropdown",
-			label: messages[language].BOLD,
-			ref: "bold",
-			options: [{
-				value: "normal",
-				label: messages[language].NORMAL
-			},{
-				value: "bold",
-				label: messages[language].BOLD
-			}
-			
-			],
-			defaultValue: "bold"
-	};	
 
 
 	messages[language].CAPITALIZE = "Capitalizar";
@@ -403,6 +386,20 @@ define( [
 				return showTo(show['options']["chartLabels"],d);
 			}	
 	};
+	
+	messages[language].FONT_COLOR = "Cor da Letra";
+	show['options']['fontColor']=["biPartite"];
+	var fontColor = {
+			type: "string",
+			label: messages[language].FONT_COLOR,
+			ref: "fontColor",
+			component:"color-picker",
+			//expression: "always",
+			defaultValue: "#190000",
+			show: function (d) {
+				return showTo(show['options']["fontColor"],d);
+			}
+	};		
 
 	messages[language].SHOW_VALUES="Mostrar Valores";
 	show['options']['showvalues']=["polar","funnel"];
@@ -450,11 +447,61 @@ define( [
 		component: "slider",
 		min: 10,
 		max: 200,
-		step: 1,			
+		step: 1,			    
+						
 		//expression: "always",
 		defaultValue: 100,
 		show:true
 	};		
+	
+
+	messages[language].BOLD = "Negrito";
+	messages[language].NORMAL = "Normal";
+	show['options']['bold']=["biPartite"];	
+	var bold = {
+			type: "string",
+			component: "dropdown",
+			label: messages[language].BOLD,
+			ref: "bold",
+			options: [{
+				value: "normal",
+				label: messages[language].NORMAL
+			},{
+				value: "bold",
+				label: messages[language].BOLD
+			}
+			
+			],
+			defaultValue: "bold",
+			show: function (d) {
+				return showTo(show['options']["bold"],d);
+			}	
+	};
+	
+	messages[language].LABEL_IN = "Label Dentro";
+	messages[language].LABEL_OUT = "Label Fora";
+	show['options']['labelIn']=["biPartite"];		
+	var labelIn = {
+			type: "string",
+			component: "dropdown",
+			label: messages[language].LABEL_IN,
+			ref: "labelIn",
+			options: [{
+				value: "in",
+				label: messages[language].LABEL_IN
+			},{
+				value: "out",
+				label: messages[language].LABEL_OUT
+			}
+			
+			],
+			defaultValue: "out",
+			show: function (d) {
+				return showTo(show['options']["labelIn"],d);
+			}	
+	};	
+	
+	
 	
 	
 	messages[language].ITEM_OPTIONS="Opções";
@@ -465,7 +512,6 @@ define( [
 			//rotateType:rotateType,
 			//minTextSize:minTextSize,
 			//maxTextSize:maxTextSize,
-			//bold:bold,
 			//capitalize:capitalize,
 			polar:polar,
 			palette:palette,
@@ -475,10 +521,13 @@ define( [
 			gridRadials:gridRadials,
 			axes:axes,
 			backgroundColor:backgroundColor,
-			chartLabels,
-			showvalues,
-			labelTextSize,
-			labelsApprox
+			chartLabels:chartLabels,
+			fontColor:fontColor,
+			showvalues:showvalues,
+			labelTextSize:labelTextSize,
+			labelIn:labelIn,
+			bold:bold,
+			labelsApprox:labelsApprox
 			
 			//,keepColors:keepColors
 
@@ -488,6 +537,181 @@ define( [
 		show: true
 	
 	};
+	
+	
+	messages[language].EDGE_MODE = "Tipo de Linha";
+	messages[language].STRAIGHT =  "Reto";
+	messages[language].CURVED = "Curvado";
+	show['biPartite']={};
+	show['biPartite']['edgeMode']=["biPartite"];
+	var edgeMode = {
+			type: "string",
+			component: "dropdown",
+			label: messages[language].EDGE_MODE,
+			
+			//label:app.GetLocaleInfo().qReturn.qCollation,
+			ref: "edgeMode",
+			options: [{
+				value: "curved",
+				label: messages[language].CURVED
+			}, 
+			{
+				value: "straight",
+				label: messages[language].STRAIGHT
+			}
+			],
+			defaultValue: "curved",
+			show: function (d) {
+				return showTo(show['biPartite']["edgeMode"],d);
+			}			
+	};		
+
+	messages[language].SPACE_LABEL_RIGHT =  "Espaço Label Direita";
+	show['biPartite']['spaceLabelRight']=["biPartite"];
+	var spaceLabelRight = {
+			type: "integer",
+			label: messages[language].SPACE_LABEL_RIGHT,
+			ref: "spaceLabelRight",
+			component: "slider",
+			min: 0,
+			max: 5,
+			step: 0.5,			
+			//expression: "always",
+			defaultValue: 2,
+			show: function (d) {
+				return showTo(show['biPartite']["spaceLabelRight"],d);
+			}	
+	};
+
+	messages[language].SPACE_LABEL_LEFT =  "Espaço Label Esquerda";
+	show['biPartite']['spaceLabelLeft']=["biPartite"];
+	var spaceLabelLeft = {
+			type: "integer",
+			label: messages[language].SPACE_LABEL_LEFT,
+			ref: "spaceLabelLeft",
+			component: "slider",
+			min: 0,
+			max: 5,
+			step: 0.5,			
+			//expression: "always",
+			defaultValue: 2,
+			show: function (d) {
+				return showTo(show['biPartite']["spaceLabelLeft"],d);
+			}	
+	};	
+	
+	
+	messages[language].PAD =  "Espaçamento";
+	show['biPartite']['pad']=["biPartite"];
+	var pad = {
+			type: "integer",
+			label: messages[language].PAD,
+			ref: "pad",
+			component: "slider",
+			min: 0,
+			max: 10,
+			step: 0.5,			
+			//expression: "always",
+			defaultValue: 2,
+			show: function (d) {
+				return showTo(show['biPartite']["pad"],d);
+			}	
+	};
+	
+	messages[language].ORIENT = "Orientação";
+	messages[language].VERTICAL = "vertical";
+	messages[language].HORIZONTAL = "horizontal";
+	show['biPartite']['orient']=["biPartite"];
+	var orient = {
+			type: "string",
+			component: "dropdown",
+			label: messages[language].ORIENT,
+			ref: "orient",
+			options: [{
+				value: "vertical",
+				label: messages[language].VERTICAL
+			},{
+				value: "horizontal",
+				label: messages[language].HORIZONTAL
+			}
+			
+			],
+			defaultValue: "vertical",
+			show: function (d) {
+				//return showTo(show['biPartite']["orient"],d);
+				return false;
+			}	
+	};	
+
+
+	messages[language].BARSIZE = "Tamanho da Barra";
+	show['biPartite']['barSize']=["biPartite"];
+	var barSize = {
+			type: "integer",
+			component: "dropdown",
+			label: messages[language].BARSIZE,
+			ref: "barSize",
+			options: [{
+				value: -50,
+				label: "0"
+			},{
+				value: -40,
+				label: 1
+			},{
+				value: -30,
+				label: 2
+			},{
+				value: -20,
+				label: 3
+			},{
+				value: -10,
+				label: 4
+			},{
+				value: 0,
+				label: 5
+			},{
+				value: 10,
+				label: 6
+			},{
+				value: 20,
+				label: 7
+			},{
+				value: 30,
+				label: 8
+			},{
+				value: 40,
+				label: 9
+			},{
+				value: 50,
+				label: 10
+			}
+			
+			],
+			defaultValue: 0,
+			show: function (d) {
+				return showTo(show['biPartite']["barSize"],d);
+				
+			}
+	};		
+	
+	show['biPartite']['biPartite']=["biPartite"];
+	var BiPartite = {
+		type:"items",
+		label:messages[language].BIPARTITE,
+		items: {			
+			edgeMode:edgeMode,
+			pad:pad,
+			spaceLabelLeft:spaceLabelLeft,
+			spaceLabelRight:spaceLabelRight,
+			orient:orient,
+			barSize:barSize
+		},
+		show: function (d) {
+			return showTo(show['biPartite']["biPartite"],d);
+			
+		}
+
+	};	
 	
 	messages[language].STEP_SCALE = "Passos da Escala";
 	show['scale']={};
@@ -605,7 +829,8 @@ define( [
 	
 	};	
 	
-	
+	show['size']={};
+	show['size']['chartRadius']=["funnel","polar","waterfall","radar"];
 	messages[language].CHART_RADIUS_SIZE = "Raio";
 	var chartRadius = {
 			type: "integer",
@@ -616,15 +841,55 @@ define( [
 			max: 200,
 			step: 1,			
 			//expression: "always",
-			defaultValue: 75
+			defaultValue: 75,
+			show: function (d) {
+				return showTo(show['size']['chartRadius'],d);
+			}
 	};
+	
+	
+	show['size']['width']=["biPartite"];
+	messages[language].CHART_WIDTH = "Largura";
+	var chartWidth = {
+			type: "integer",
+			label: messages[language].CHART_WIDTH,
+			ref: "width",
+			component: "slider",
+			min: 1,
+			max: 20,
+			step: 0.25,			
+			//expression: "always",
+			defaultValue: 8,
+			show: function (d) {
+				return showTo(show['size']['width'],d);
+			}
+	};		
+
+	show['size']['height']=["biPartite"];
+	messages[language].CHART_HEIGHT = "Altura";
+	var chartHeight = {
+			type: "integer",
+			label: messages[language].CHART_HEIGHT,
+			ref: "height",
+			component: "slider",
+			min: 1,
+			max: 20,
+			step: 0.25,			
+			//expression: "always",
+			defaultValue: 8,
+			show: function (d) {
+				return showTo(show['size']['height'],d);
+			}
+	};		
 	
 	messages[language].ITEM_SIZE = "Tamanho"
 	var chartSize = {
 		type:"items",
 		label:messages[language].ITEM_SIZE,
 		items: {
-			chartRadius:chartRadius
+			chartRadius:chartRadius,
+			chartWidth:chartWidth,
+			chartHeight:chartHeight
 			//,
 			//donutWidth:donutWidth		
 
@@ -719,16 +984,18 @@ define( [
 	
 	};
 	
+	
+	
 	show['position']={};
 	messages[language].CHART_POSITION_VERTICAL="Vertical";
-	show['position']['gutterTop']=["polar","waterfall","radar"];
+	show['position']['gutterTop']=["polar","waterfall","radar","biPartite"];
 	var gutterTop = {
 			type: "integer",
 			label: messages[language].CHART_POSITION_VERTICAL,
 			ref: "gutterTop",
 			component: "slider",
-			min: -20,
-			max: 100,
+			min: -60,
+			max: 200,
 			step: 1,
 			//expression: "always",
 			defaultValue: 30,
@@ -737,17 +1004,22 @@ define( [
 			}
 	};
 	
+	
+	show['position']['gutterLeft']=["funnel","polar","waterfall","radar","biPartite"];	
 	messages[language].CHART_POSITION_HORIZONTAL="Horizontal";
 	var gutterLeft = {
 			type: "integer",
 			label: messages[language].CHART_POSITION_HORIZONTAL,
 			ref: "gutterLeft",
 			component: "slider",
-			min: -20,
+			min: -100,
 			max: 200,
 			step: 1,
 			//expression: "always",
-			defaultValue: 90
+			defaultValue: 20,
+			show: function (d) {
+				return showTo(show['position']['gutterLeft'],d);
+			}
 	};
 
 	messages[language].ITEM_POSITION="Posição";	
@@ -775,7 +1047,8 @@ define( [
 			Position:Position,
 			chartSize:chartSize,
 			legends:legends,
-			Scale:Scale
+			Scale:Scale,
+			BiPartite:BiPartite
 			
 		}
 	
