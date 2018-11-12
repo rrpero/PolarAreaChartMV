@@ -52,6 +52,13 @@ define( [
 	// *****************************************************************************
     // Options Section
     // *****************************************************************************
+
+	var showTo =  function (a,d){
+				if(a.indexOf(d.polar) >=0)
+					return true;
+				return false;
+	};
+	var show={};
 	
 	messages[language].ROTATE_TYPE= "Tipo Rotação";
 	messages[language].RANDOM2 = "Aleatório 2";
@@ -63,6 +70,10 @@ define( [
 	messages[language].FIXED5 = "Fixo 5";
 	messages[language].FIXED7 = "Fixo 7";
 
+	
+	show['options']={};
+	show['options']['rotateType']=["wordCloudChart"];
+	
 	var rotateType = {
 			type: "string",
 			component: "dropdown",
@@ -103,10 +114,15 @@ define( [
 				label: messages[language].FIXED7
 			}
 			],
-			defaultValue: "random2"
+			defaultValue: "random2",
+			show: function (d){
+				return showTo(show['options']['rotateType'],d);
+
+			}				
 	};
 	
 	messages[language].MIN_TEXT_SIZE = "Tamanho Mínimo Texto";
+	show['options']['minTextSize']=["wordCloudChart"];
 	var minTextSize = {
 			type: "integer",
 			label: messages[language].MIN_TEXT_SIZE,
@@ -116,10 +132,15 @@ define( [
 			max: 200,
 			step: 1,			
 			//expression: "always",
-			defaultValue: 15
+			defaultValue: 15,
+			show: function (d){
+				return showTo(show['options']['minTextSize'],d);
+
+			}
 	};	
 
 	messages[language].MAX_TEXT_SIZE =  "Tamanho Máximo Texto";
+	show['options']['maxTextSize']=["wordCloudChart"];
 	var maxTextSize = {
 			type: "integer",
 			label: messages[language].MAX_TEXT_SIZE,
@@ -129,23 +150,28 @@ define( [
 			max: 20,
 			step: 0.5,			
 			//expression: "always",
-			defaultValue: 4
+			defaultValue: 4,
+			show: function (d){
+				return showTo(show['options']['maxTextSize'],d);
+
+			}
 	};	
 
 
-	messages[language].POLAR_OR_RADAR = "Radar ou Polar";
+	messages[language].CHART_TYPE = "Tipo de Gráfico";
 	messages[language].POLAR = "Polar";
 	messages[language].RADAR = "Radar";
 	messages[language].FUNNEL = "Pirâmide";
 	messages[language].WATERFALL = "Waterfall";			
 	//messages[language].CHORD = "Chord";
 	messages[language].BIPARTITE = "Bipartido";
+	messages[language].WORDCLOUD = "Word Cloud";
 
 	
 	var polar = {
 		type: "string",
 		component: "dropdown",
-		label: messages[language].POLAR_OR_RADAR,
+		label: messages[language].CHART_TYPE,
 		ref: "polar",
 		options: [{
 			value: "polar",
@@ -163,6 +189,9 @@ define( [
 		}, {
 			value: "waterfall",
 			label: messages[language].WATERFALL
+		}, {
+			value: "wordCloudChart",
+			label: messages[language].WORDCLOUD
 		}],
 		defaultValue: "polar"
 	};	
@@ -208,6 +237,7 @@ define( [
 	};
 
 	messages[language].TRANSPARENT="Transparência";
+	show['options']['transparent']=["radar","funnel","waterfall","polar"];		
 	var transparent = {
 		type: "float",
 		label: messages[language].TRANSPARENT,
@@ -217,13 +247,17 @@ define( [
 		max: 1,
 		step: 0.1,			
 		//expression: "always",
-		defaultValue: 1
+		defaultValue: 1,
+		show: function (d){
+			return showTo(show['options']['capitalize'],d);
+
+		}
 	};		
 
 
 	messages[language].CAPITALIZE = "Capitalizar";
 	messages[language].UPPER = "Maiúsculas";
-	
+	show['options']['capitalize']=["wordCloudChart"];	
 	var capitalize = {
 			type: "string",
 			component: "dropdown",
@@ -238,13 +272,17 @@ define( [
 			}
 			
 			],
-			defaultValue: "upper"
+			defaultValue: "upper",
+			show: function (d){
+				return showTo(show['options']['capitalize'],d);
+
+			}			
 	};		
 	
 	messages[language].BORDER = "Borda";
 	messages[language].YES = "Sim";
 	messages[language].NO = "Não";
-	
+	show['options']['border']=["wordCloudChart"];		
 	var border = {
 		type: "boolean",
 		component: "switch",
@@ -257,7 +295,11 @@ define( [
 			value: false,
 			label: messages[language].NO
 		}],
-		defaultValue: false
+		defaultValue: false,
+		show: function (d){
+			return showTo(show['options']['border'],d);
+
+		}	
 	};	
 	messages[language].GRID = "Grid";
 /*	var grid = {
@@ -274,15 +316,8 @@ define( [
 		}],
 		defaultValue: true
 	};	*/	
-	
-	
-	var showTo =  function (a,d){
-				if(a.indexOf(d.polar) >=0)
-					return true;
-				return false;
-	};
-	var show={};
-	show['options']={};
+
+
 	show['options']['grid']=["polar","radar"];
 	messages[language].GRID  = "Grid";
 	var grid = {
@@ -439,7 +474,7 @@ define( [
 	};	
 	
 	messages[language].LABEL_TEXT_SIZE="Label Text Size";
-
+	show['options']['labelTextSize']=["polar","waterfall","radar","funnel"];
 	var labelTextSize = {
 		type: "integer",
 		label: messages[language].LABEL_TEXT_SIZE,
@@ -451,13 +486,16 @@ define( [
 						
 		//expression: "always",
 		defaultValue: 100,
-		show:true
+		show:true,
+		show: function (d) {
+			return showTo(show['options']["labelTextSize"],d);
+		}	
 	};		
 	
 
 	messages[language].BOLD = "Negrito";
 	messages[language].NORMAL = "Normal";
-	show['options']['bold']=["biPartite"];	
+	show['options']['bold']=["biPartite","wordCloudChart"];	
 	var bold = {
 			type: "string",
 			component: "dropdown",
@@ -509,14 +547,15 @@ define( [
 		type:"items",
 		label:messages[language].ITEM_OPTIONS,
 		items: {			
-			//rotateType:rotateType,
-			//minTextSize:minTextSize,
-			//maxTextSize:maxTextSize,
-			//capitalize:capitalize,
+
 			polar:polar,
+			rotateType:rotateType,
+			minTextSize:minTextSize,
+			maxTextSize:maxTextSize,
+			capitalize:capitalize,			
 			palette:palette,
 			transparent:transparent,
-			//border:border,
+			border:border,
 			grid:grid,
 			gridRadials:gridRadials,
 			axes:axes,
