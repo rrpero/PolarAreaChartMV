@@ -17,7 +17,8 @@ requirejs.config({
 		"RGraph.waterfall": "../extensions/PolarAreaChartMV/libraries/RGraph.waterfall",
 		"RGraph.common.key": "../extensions/PolarAreaChartMV/libraries/RGraph.common.key",
 		"d3":'../extensions/PolarAreaChartMV/libraries/d3',
-		"viz":'../extensions/PolarAreaChartMV/libraries/viz',
+		"viz":'../extensions/PolarAreaChartMV/libraries/viz'
+		,
 		"cloud":'../extensions/PolarAreaChartMV/libraries/d3.layout.cloud'
     },
  /*   shim: {
@@ -55,6 +56,7 @@ define( [
 		,'d3'
 		,'viz'	
 		,'cloud'
+		,"text!./border.css"
 		,"RGraph"
 		,"RGraph.rosemv"
 		,"RGraph.radar"
@@ -71,11 +73,12 @@ define( [
 		
     ],
 	
-    function ( $, qlik, props, initProps,d3,viz,cloud) {
+    function ( $, qlik, props, initProps,d3,viz,cloud,css) {
         'use strict';	
+		window.d3=d3;
 		//window.RGraph={isRGraph: true};
 		//Inject Stylesheet into header of current document
-		//$( '<style>' ).html(styleSheet).appendTo( 'head' );
+		$( '<style>' ).html(css).appendTo( 'head' );
 		
         return {
 			//window.RGraph=RGraph;

@@ -376,13 +376,17 @@ define( [
 	};		
 	
 	messages[language].BACKGROUND_COLOR = "Cor de Fundo";
+	show['options']['backgroundColor']=["polar","funnel","radar","waterfall","wordCloudChart"];		
 	var backgroundColor = {
 			type: "string",
 			label: messages[language].BACKGROUND_COLOR,
 			ref: "backgroundColor",
 			component:"color-picker",
 			//expression: "always",
-			defaultValue: "#ffffff"
+			defaultValue: "#ffffff",
+			show: function (d) {
+				return showTo(show['options']["backgroundColor"],d);
+			}				
 			
 	};	
 	
@@ -474,7 +478,7 @@ define( [
 	};	
 	
 	messages[language].LABEL_TEXT_SIZE="Label Text Size";
-	show['options']['labelTextSize']=["polar","waterfall","radar","funnel"];
+	show['options']['labelTextSize']=["polar","waterfall","radar","funnel","biPartite"];
 	var labelTextSize = {
 		type: "integer",
 		label: messages[language].LABEL_TEXT_SIZE,
