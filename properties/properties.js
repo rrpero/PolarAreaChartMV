@@ -176,7 +176,7 @@ define( [
 		options: [{
 			value: "polar",
 			label: messages[language].POLAR
-		}, 
+		}/*, 
 		{
 			value: "biPartite",
 			label: messages[language].BIPARTITE
@@ -192,7 +192,7 @@ define( [
 		}, {
 			value: "wordCloudChart",
 			label: messages[language].WORDCLOUD
-		}],
+		}*/],
 		defaultValue: "polar"
 	};	
 	
